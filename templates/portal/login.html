@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ui.login }}{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+
+{% block content %}
+<section class="auth-shell shell">
+  <div class="auth-story">
+    <p class="eyebrow light"><span aria-hidden="true">✦</span> GABAY MANAGEMENT</p>
+    <h1>{% if ui_language == 'tl' %}Tamang datos, <em>may tamang pananagutan.</em>{% else %}Good evidence, <em>with clear accountability.</em>{% endif %}</h1>
+    <p>{% if ui_language == 'tl' %}Para lamang sa awtorisadong encoder, verifier, at research administrator. Itinatala ng sistema ang mahahalagang pagbabago.{% else %}For authorized encoders, verifiers, and research administrators only. Material changes are recorded by the system.{% endif %}</p>
+    <div class="role-chips"><span>ENCODER</span><span>VERIFIER</span><span>RESEARCH ADMIN</span></div>
+  </div>
+  <article class="login-card">
+    <span class="step-badge">STAFF</span>
+    <h2>{{ ui.login }}</h2>
+    <p>{% if ui_language == 'tl' %}Gamitin ang account na ibinigay ng research administrator.{% else %}Use the account issued by the research administrator.{% endif %}</p>
+    {% if form.non_field_errors %}<div class="form-alert" role="alert"><span aria-hidden="true">!</span>{% if ui_language == 'tl' %}Hindi tumugma ang username at password. Subukan muli.{% else %}The username and password did not match. Try again.{% endif %}</div>{% endif %}
+    <form method="post" class="login-form" novalidate>
+      {% csrf_token %}
+      {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+      <div class="field-group {% if form.username.errors %}has-error{% endif %}">
+        <label for="{{ form.username.id_for_label }}">{% if ui_language == 'tl' %}Username{% else %}Username{% endif %}</label>
+        {{ form.username }}
+        {% for error in form.username.errors %}<p class="field-error" role="alert">{{ error }}</p>{% endfor %}
+      </div>
+      <div class="field-group {% if form.password.errors %}has-error{% endif %}">
+        <label for="{{ form.password.id_for_label }}">{% if ui_language == 'tl' %}Password{% else %}Password{% endif %}</label>
+        {{ form.password }}
+        {% for error in form.password.errors %}<p class="field-error" role="alert">{{ error }}</p>{% endfor %}
+      </div>
+      <button class="button button-harvest button-wide" type="submit">{{ ui.login }} <span aria-hidden="true">→</span></button>
+    </form>
+    <a class="back-link" href="{% url 'portal:home' %}"><span aria-hidden="true">←</span> {% if ui_language == 'tl' %}Bumalik sa pampublikong gabay{% else %}Back to the public guide{% endif %}</a>
+  </article>
+</section>
+{% endblock %}

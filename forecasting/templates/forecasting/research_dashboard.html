@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Research laboratory | GABAY{% endblock %}
+{% block body_class %}research-page{% endblock %}
+
+{% block content %}
+<section class="page-hero compact-hero">
+  <div class="eyebrow">Research administration · reproducible evidence</div>
+  <h1>Forecast laboratory</h1>
+  <p>Run chronological one-week experiments, inspect model errors, and preserve every published forecast in a locked ledger.</p>
+</section>
+
+<section class="content-grid research-grid" aria-labelledby="run-heading">
+  <article class="panel panel-dark">
+    <div class="section-kicker">One job at a time</div>
+    <h2 id="run-heading">Run model comparison</h2>
+    <p>Uses 52 initial training weeks and 12 rolling-origin folds. The naive baseline, MA4, SES, and bounded ARIMA candidates are scored on the same targets.</p>
+    {% if running %}
+      <div class="notice warning" role="status">An experiment is currently running. Public pages continue using the last valid forecast.</div>
+    {% endif %}
+    <form method="post" action="{% url 'forecasting:run-experiment' %}" class="stack-form">
+      {% csrf_token %}
+      {{ experiment_form.as_p }}
+      <button class="button button-harvest" type="submit" {% if running %}disabled{% endif %}>Run experiment</button>
+    </form>
+  </article>
+
+  <aside class="panel methodology-card">
+    <div class="section-kicker">Protocol guardrails</div>
+    <h2>No hidden accuracy claims</h2>
+    <ul class="check-list">
+      <li>Minimum 64 observed weeks and 90% coverage</li>
+      <li>Only isolated one-week gaps may be interpolated</li>
+      <li>Champion selected by MAE, then RMSE and MAPE</li>
+      <li>Reliability is an error band—not a success probability</li>
+      <li>Historical targets are labeled simulations</li>
+    </ul>
+  </aside>
+</section>
+
+<section class="section-block" aria-labelledby="runs-heading">
+  <div class="section-heading">
+    <div><span class="section-kicker">Audit trail</span><h2 id="runs-heading">Recent experiments</h2></div>
+  </div>
+  <div class="table-shell">
+    <table>
+      <thead><tr><th>Run</th><th>Dataset</th><th>Status</th><th>Champion</th><th>Rolling-fold evidence</th><th>Forecast</th><th>Runtime</th></tr></thead>
+      <tbody>
+      {% for run in runs %}
+        <tr>
+          <td>#{{ run.pk }}<br><small>{{ run.created_at|date:"M j, Y H:i" }}</small></td>
+          <td>{{ run.snapshot.series.name }}<br><small>{{ run.snapshot.fingerprint|slice:":12" }}…</small></td>
+          <td><span class="status-chip status-{{ run.status|lower }}">{{ run.get_status_display }}</span></td>
+          <td>{{ run.selected_model|default:"—" }}</td>
+          <td>
+            {% if run.selected_metrics.available %}
+              MAE {{ run.selected_metrics.mae }} · RMSE {{ run.selected_metrics.rmse }} · MAPE {{ run.selected_metrics.mape }}%
+              <br><small>{{ run.selected_metrics.folds }} held-out folds; {{ run.fold_metrics.count }} candidate-fold predictions retained</small>
+              <details>
+                <summary>Compare every candidate</summary>
+                <ul>
+                {% for model_name, metrics in run.aggregate_metrics.items %}
+                  <li><strong>{{ model_name }}</strong> — {% if metrics.available %}MAE {{ metrics.mae }}, RMSE {{ metrics.rmse }}, MAPE {{ metrics.mape }}% across {{ metrics.folds }} folds{% else %}Unavailable: {{ metrics.error }}{% endif %}</li>
+                {% endfor %}
+                </ul>
+              </details>
+            {% else %}—{% endif %}
+          </td>
+          <td>{% if run.point_forecast %}₱{{ run.point_forecast|floatformat:2 }}/kg{% else %}—{% endif %}</td>
+          <td>{% if run.runtime_seconds %}{{ run.runtime_seconds }}s{% else %}—{% endif %}</td>
+        </tr>
+        {% if run.error_message %}<tr class="error-row"><td colspan="7">{{ run.error_message }}</td></tr>{% endif %}
+      {% empty %}
+        <tr><td colspan="7">No model experiment has been run.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="section-block" aria-labelledby="ledger-heading">
+  <div class="section-heading"><div><span class="section-kicker">Locked before observation</span><h2 id="ledger-heading">Forecast ledger</h2></div></div>
+  <div class="table-shell">
+    <table>
+      <thead><tr><th>Target week</th><th>Series</th><th>Kind</th><th>Forecast (80% interval)</th><th>Observed / error</th><th>Decision</th></tr></thead>
+      <tbody>
+      {% for item in forecasts %}
+        <tr>
+          <td>{{ item.target_week|date:"M j, Y" }}</td><td>{{ item.series.name }}</td><td>{{ item.get_kind_display }}</td>
+          <td>₱{{ item.point_forecast|floatformat:2 }} <small>(₱{{ item.interval_lower|floatformat:2 }}–₱{{ item.interval_upper|floatformat:2 }})</small></td>
+          <td>{% if item.observed_value %}₱{{ item.observed_value|floatformat:2 }}<br><small>Signed {{ item.forecast_error|floatformat:2 }} · absolute {{ item.absolute_error|floatformat:2 }} · {{ item.absolute_percentage_error|floatformat:2 }}%</small>{% else %}Pending{% endif %}</td>
+          <td>{% if item.recommendation %}{{ item.recommendation.get_decision_display }}{% else %}—{% endif %}</td>
+        </tr>
+      {% empty %}<tr><td colspan="6">The ledger is empty.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="section-block" aria-labelledby="rules-heading">
+  <div class="section-heading"><div><span class="section-kicker">Versioned logic</span><h2 id="rules-heading">Decision rule history</h2></div></div>
+  <div class="card-grid">
+  {% for rules in rule_sets %}
+    <article class="panel">
+      <span class="status-chip">{{ rules.get_status_display }}</span>
+      <h3>{{ rules.version }}</h3><p>{{ rules.label }}</p>
+      <dl class="metric-list">
+        <div><dt>Forecast</dt><dd>±{{ rules.forecast_threshold_pct }}%</dd></div>
+        <div><dt>Trend</dt><dd>±{{ rules.trend_threshold_pct }}%</dd></div>
+        <div><dt>Context</dt><dd>±{{ rules.context_threshold_pct }}%</dd></div>
+        <div><dt>Stale after</dt><dd>{{ rules.stale_after_days }} days</dd></div>
+      </dl>
+      {% if rules.status == "DRAFT" and perms.forecasting.freeze_decision_rules %}
+      <form method="post" action="{% url 'forecasting:freeze-rule-set' %}" class="stack-form compact-form">
+        {% csrf_token %}<input type="hidden" name="rule_set_id" value="{{ rules.pk }}">
+        <label for="confirmation-{{ rules.pk }}">Type <strong>{{ rules.version }}</strong> after adviser approval</label>
+        <input id="confirmation-{{ rules.pk }}" name="confirmation" required>
+        <button class="button button-outline" type="submit">Freeze immutable version</button>
+      </form>
+      {% endif %}
+    </article>
+  {% endfor %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Import {{ batch.public_id }} | GABAY{% endblock %}
+
+{% block content %}
+<main class="page-shell management-page">
+  <header class="page-header"><div><p class="eyebrow">{{ batch.get_kind_display }}</p><h1>{{ batch.original_filename|default:"Price import" }}</h1><p>{{ batch.series.name }} · {{ batch.source.name }}</p></div><span class="status-chip">{{ batch.get_status_display }}</span></header>
+  <section class="metric-grid"><article class="metric-card"><span>Total rows</span><strong>{{ batch.total_rows }}</strong></article><article class="metric-card"><span>Ready or flagged</span><strong>{{ batch.valid_rows }}</strong></article><article class="metric-card"><span>Errors / duplicates</span><strong>{{ batch.error_rows }}</strong></article><article class="metric-card"><span>Approved</span><strong>{{ batch.approved_rows }}</strong></article></section>
+  <div class="button-row"><a class="button button-secondary" href="{% url 'prices:import-errors' batch.public_id %}">Download row errors</a></div>
+  {% if can_verify and is_own %}<div class="alert alert-warning">Maker-checker control: the uploader cannot approve or reject rows in this batch.</div>{% endif %}
+  <section class="panel"><div class="table-wrap"><table>
+    <thead><tr><th>Row</th><th>Date</th><th>Original</th><th>PHP/kg</th><th>Status</th><th>Findings</th><th>Decision</th></tr></thead>
+    <tbody>
+      {% for row in rows %}<tr>
+        <td>{{ row.row_number }}</td><td>{{ row.observed_on|default:"—" }}</td><td>{{ row.original_price|default:"—" }} {{ row.original_unit }}</td><td>{{ row.normalized_price|floatformat:2|default:"—" }}</td><td><span class="status-chip status-{{ row.status }}">{{ row.get_status_display }}</span></td>
+        <td><ul class="compact-list">{% for error in row.validation_errors %}<li><strong>{{ error.field }}:</strong> {{ error.message }}</li>{% empty %}<li>Ready for verification.</li>{% endfor %}</ul></td>
+        <td>
+          {% if can_verify and not is_own %}
+            {% if row.status == "valid" or row.status == "outlier" or row.status == "conflict" %}
+              <form method="post" action="{% url 'prices:import-row-approve' batch.public_id row.row_number %}">{% csrf_token %}<input type="hidden" name="reason" value="Checked against staged evidence">{% if row.status == "outlier" %}<label><input type="checkbox" name="accept_outlier" required> Evidence checked</label>{% endif %}{% if row.status == "conflict" %}<label><input type="checkbox" name="accept_conflict" required> Conflict reconciled</label>{% endif %}<button class="button button-small" type="submit">Approve</button></form>
+              <form method="post" action="{% url 'prices:import-row-reject' batch.public_id row.row_number %}">{% csrf_token %}<label class="sr-only" for="reason-{{ row.row_number }}">Rejection reason</label><input id="reason-{{ row.row_number }}" name="reason" placeholder="Required reason" required><button class="button button-danger button-small" type="submit">Reject</button></form>
+            {% elif row.observation %}<a href="{% url 'prices:observation-detail' row.observation.public_id %}">View evidence</a>{% else %}—{% endif %}
+          {% elif row.observation %}<a href="{% url 'prices:observation-detail' row.observation.public_id %}">View evidence</a>{% else %}—{% endif %}
+        </td>
+      </tr>{% empty %}<tr><td colspan="7">No staged rows.</td></tr>{% endfor %}
+    </tbody>
+  </table></div></section>
+</main>
+{% endblock %}

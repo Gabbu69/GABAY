@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Price evidence | GABAY{% endblock %}
+
+{% block content %}
+<main class="page-shell management-page">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Evidence workspace</p>
+      <h1>Price data review</h1>
+      <p>Local observations, official references, and demonstration records remain separate.</p>
+    </div>
+    <div class="button-row">
+      {% if can_encode %}<a class="button button-primary" href="{% url 'prices:observation-create' %}">Add evidence</a>{% endif %}
+      {% if can_encode %}<a class="button button-secondary" href="{% url 'prices:import-create' %}">Stage CSV</a>{% endif %}
+      {% if can_administer_research %}<a class="button button-secondary" href="{% url 'prices:series-selection' %}">Choose public series</a>{% endif %}
+    </div>
+  </header>
+
+  <section class="metric-grid" aria-label="Evidence totals">
+    <article class="metric-card"><span>Awaiting verification</span><strong>{{ pending_count }}</strong></article>
+    <article class="metric-card"><span>Current verified records</span><strong>{{ verified_count }}</strong></article>
+    <article class="metric-card"><span>Imports needing review</span><strong>{{ review_batch_count }}</strong></article>
+  </section>
+
+  <section class="panel">
+    <div class="panel-heading"><div><p class="eyebrow">Explicit selection</p><h2>Primary public series</h2></div></div>
+    <ul class="record-list">
+      {% for series in primary_series %}<li><strong>{{ series.get_scope_display }}</strong><span>{{ series.name }} · {{ series.get_classification_display }} · {{ series.get_condition_display }} · {{ series.location_name }}</span></li>{% empty %}<li>No primary public series selected. Public guidance will remain unavailable rather than choosing a classification automatically.</li>{% endfor %}
+    </ul>
+  </section>
+
+  <section class="content-grid content-grid-wide">
+    <article class="panel">
+      <div class="panel-heading">
+        <div><p class="eyebrow">Recent activity</p><h2>Price observations</h2></div>
+        <a href="{% url 'prices:observation-list' %}">View all</a>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Date</th><th>Series</th><th>PHP/kg</th><th>Status</th></tr></thead>
+          <tbody>
+            {% for item in recent_observations %}
+              <tr>
+                <td><a href="{% url 'prices:observation-detail' item.public_id %}">{{ item.observed_on }}</a></td>
+                <td>{{ item.series.name }}</td>
+                <td>{{ item.normalized_price|floatformat:2 }}</td>
+                <td><span class="status-chip status-{{ item.workflow_status }}">{{ item.get_workflow_status_display }}</span></td>
+              </tr>
+            {% empty %}<tr><td colspan="4">No price evidence has been entered.</td></tr>{% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <aside class="panel">
+      <div class="panel-heading"><div><p class="eyebrow">Intake</p><h2>Recent batches</h2></div><a href="{% url 'prices:import-list' %}">View all</a></div>
+      <ul class="record-list">
+        {% for batch in recent_batches %}
+          <li><a href="{% url 'prices:import-detail' batch.public_id %}"><strong>{{ batch.original_filename|default:batch.get_kind_display }}</strong><span>{{ batch.get_status_display }} · {{ batch.total_rows }} rows</span></a></li>
+        {% empty %}<li>No import batches yet.</li>{% endfor %}
+      </ul>
+    </aside>
+  </section>
+</main>
+{% endblock %}

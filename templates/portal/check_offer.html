@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ui.check_offer }}{% endblock %}
+{% block body_class %}interior-page offer-page{% endblock %}
+
+{% block content %}
+<section class="page-mast shell offer-mast">
+  <div>
+    <p class="eyebrow dark"><span aria-hidden="true">✦</span> {% if ui_language == 'tl' %}Pribado at pansamantala{% else %}Private and temporary{% endif %}</p>
+    <h1>{% if ui_language == 'tl' %}May presyo nang alok? <em>Lagyan natin ng konteksto.</em>{% else %}Have an offer price? <em>Put it in context.</em>{% endif %}</h1>
+    <p>{% if ui_language == 'tl' %}Gagamitin ang parehong nailathalang taya at nakapirming panuntunan ng GABAY. Hindi ise-save ang ilalagay mong halaga.{% else %}Use the same published forecast and locked GABAY rules. The amount you enter is evaluated once and never saved.{% endif %}</p>
+  </div>
+  <div class="privacy-seal" aria-label="{{ ui.privacy_note }}"><span aria-hidden="true">○</span><strong>{% if ui_language == 'tl' %}HINDI SINE-SAVE{% else %}NOT SAVED{% endif %}</strong><small>{% if ui_language == 'tl' %}sa database{% else %}to the database{% endif %}</small></div>
+</section>
+
+<section class="section-tight shell offer-layout">
+  <article class="offer-form-card">
+    <div class="offer-form-intro">
+      <span class="step-badge">01</span>
+      <div><h2>{% if ui_language == 'tl' %}Ilagay ang alok{% else %}Enter the offer{% endif %}</h2><p id="offer-help">{% if ui_language == 'tl' %}Gamitin ang aktuwal na presyo kada kilo, bago ibawas ang sariling gastos.{% else %}Use the actual price per kilogram before subtracting your own costs.{% endif %}</p></div>
+    </div>
+    <form method="post" class="offer-form" novalidate data-online-required>
+      {% csrf_token %}
+      <div class="field-group {% if form.offer_price.errors %}has-error{% endif %}">
+        <label for="{{ form.offer_price.id_for_label }}">{{ form.offer_price.label }}</label>
+        <div class="money-input"><span aria-hidden="true">₱</span>{{ form.offer_price }}<b>{{ ui.php_kg }}</b></div>
+        {% if form.offer_price.help_text %}<small>{{ form.offer_price.help_text }}</small>{% endif %}
+        {% for error in form.offer_price.errors %}<p class="field-error" role="alert">{{ error }}</p>{% endfor %}
+      </div>
+      <button class="button button-harvest button-wide" type="submit">
+        {% if ui_language == 'tl' %}Suriin ang presyong ito{% else %}Check this price{% endif %}<span aria-hidden="true">→</span>
+      </button>
+      <p class="privacy-line" id="offer-privacy"><span aria-hidden="true">◌</span>{{ ui.privacy_note }}</p>
+      <p class="online-required-note" hidden data-offline-only>{% if ui_language == 'tl' %}Kailangan ng koneksiyon para masuri ang alok.{% else %}A connection to GABAY is required to check an offer.{% endif %}</p>
+    </form>
+    {% if evaluation_error %}<div class="form-alert" role="alert"><span aria-hidden="true">!</span>{{ evaluation_error }}</div>{% endif %}
+  </article>
+
+  <aside class="offer-context-card">
+    <span class="step-badge">02</span>
+    <h2>{% if ui_language == 'tl' %}Kontekstong gagamitin{% else %}Context GABAY will use{% endif %}</h2>
+    <dl class="context-list">
+      <div><dt>{{ ui.current_price }}</dt><dd>{% if prices.selected.latest %}₱{{ prices.selected.latest.price|floatformat:2 }}{% else %}—{% endif %}</dd></div>
+      <div><dt>{{ ui.source }}</dt><dd>{% if prices.selected.source_count == 1 %}{{ prices.selected.source.name }}{% elif prices.selected.source_count > 1 %}{{ prices.selected.source_count }} {% if ui_language == 'tl' %}pinagmulan{% else %}sources{% endif %}{% else %}—{% endif %}</dd></div>
+      <div><dt>{% if ui_language == 'tl' %}Serye{% else %}Published series{% endif %}</dt><dd>{% if prices.selected.series_metadata.name %}{{ prices.selected.series_metadata.classification_label }} · {{ prices.selected.series_metadata.condition_label }}{% else %}—{% endif %}</dd></div>
+      <div><dt>{% if ui_language == 'tl' %}Bersiyon ng tuntunin{% else %}Rule version{% endif %}</dt><dd>{% if result %}{{ result.rule_version|default:"—" }}{% if result.rule_status %} · {{ result.rule_status }}{% endif %}{% else %}{{ forecast_rule_version|default:"—" }}{% if forecast_rule_status %} · {{ forecast_rule_status }}{% endif %}{% endif %}</dd></div>
+    </dl>
+    <p class="microcopy"><span aria-hidden="true">i</span>{% if ui_language == 'tl' %}Hindi kusang pinapalitan ng opisyal na provincial reference ang lokal na lingguhang presyo.{% else %}Official provincial reference data never silently replaces a local weekly price.{% endif %}</p>
+  </aside>
+</section>
+
+{% if result %}
+<section class="section shell offer-result-section" aria-labelledby="offer-result-title" tabindex="-1" data-offer-result>
+  <header class="section-heading split-heading">
+    <div><p class="eyebrow dark"><span aria-hidden="true">✦</span> {% if ui_language == 'tl' %}Pansamantalang pagsusuri{% else %}One-time evaluation{% endif %}</p><h2 id="offer-result-title">{% if ui_language == 'tl' %}Ang alok na ₱{{ result.offer_price|floatformat:2 }} ay nagresulta sa:{% else %}The ₱{{ result.offer_price|floatformat:2 }} offer results in:{% endif %}</h2></div>
+    <p>{% if ui_language == 'tl' %}Para sa kasalukuyang nailathalang datos at tuntunin lamang ang resultang ito.{% else %}This result applies only to the currently published data and rule version.{% endif %}</p>
+  </header>
+  <div class="offer-result-grid">
+    <article class="recommendation-card compact decision-{{ result.decision|lower }}">
+      <div class="recommendation-topline"><span class="result-icon" aria-hidden="true">{% if result.decision == 'SELL' %}↓{% elif result.decision == 'WAIT' %}↑{% else %}↔{% endif %}</span><span>{{ ui.recommendation }}</span></div>
+      <div class="recommendation-result">{% if result.decision == 'SELL' %}{{ ui.sell }}{% elif result.decision == 'WAIT' %}{{ ui.wait }}{% else %}{{ ui.monitor }}{% endif %}</div>
+      {% if result.message %}<p class="recommendation-summary">{{ result.message }}</p>{% endif %}
+      <div class="recommendation-meta"><div><small>{{ ui.reliability }}</small><strong>{{ result.reliability }}</strong></div><div><small>{% if ui_language == 'tl' %}Alok{% else %}Offer{% endif %}</small><strong>₱{{ result.offer_price|floatformat:2 }}</strong></div></div>
+    </article>
+    <article class="reason-card result-reasons">
+      <h3>{{ ui.why }}</h3>
+      {% if result.reasons %}<ol class="reason-list">{% for reason in result.reasons %}<li><span>{{ forloop.counter|stringformat:"02d" }}</span><p>{{ reason }}</p></li>{% endfor %}</ol>{% else %}<p class="empty-note">{% if ui_language == 'tl' %}Walang karagdagang dahilan ang nailathala.{% else %}No additional reasons were published.{% endif %}</p>{% endif %}
+      <p class="microcopy"><span aria-hidden="true">i</span>{{ ui.disclaimer }}</p>
+    </article>
+  </div>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}{% if result %}<script>window.addEventListener("DOMContentLoaded",()=>document.querySelector("[data-offer-result]")?.focus());</script>{% endif %}{% endblock %}

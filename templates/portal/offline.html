@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ ui.offline }}{% endblock %}
+{% block body_class %}offline-page{% endblock %}
+
+{% block content %}
+<section class="offline-shell shell">
+  <div class="offline-art" aria-hidden="true"><img src="{% static 'images/rice-sprig.svg' %}" width="150" height="220" alt=""><span>OFFLINE</span></div>
+  <div class="offline-copy">
+    <p class="eyebrow dark"><span aria-hidden="true">✦</span> {{ ui.offline }}</p>
+    <h1>{% if ui_language == 'tl' %}Walang koneksiyon, <em>pero hindi nawawala ang konteksto.</em>{% else %}No connection, <em>but context is not lost.</em>{% endif %}</h1>
+    <p>{% if ui_language == 'tl' %}Maaaring basahin ang huling nabuksang dashboard, kasaysayan, at pamamaraan. Lahat ng presyong makikita offline ay dapat ituring na luma hanggang muling makakonekta.{% else %}You can still read the last opened dashboard, history, and methodology. Treat every price shown offline as stale until GABAY reconnects.{% endif %}</p>
+    <div class="offline-actions"><button class="button button-green" type="button" data-retry>{% if ui_language == 'tl' %}Subukang kumonekta muli{% else %}Try reconnecting{% endif %} <span aria-hidden="true">↻</span></button><a class="text-link" href="{% url 'portal:home' %}">{{ ui.home }} <span aria-hidden="true">→</span></a></div>
+    <div class="boundary-note"><span class="round-icon" aria-hidden="true">!</span><div><strong>{% if ui_language == 'tl' %}Hindi available offline{% else %}Unavailable offline{% endif %}</strong><p>{% if ui_language == 'tl' %}Pag-check ng alok, pag-sign in, pag-encode, pagberipika, at pagtakbo ng forecast.{% else %}Offer checking, staff sign-in, data entry, verification, and forecast runs.{% endif %}</p></div></div>
+  </div>
+</section>
+{% endblock %}

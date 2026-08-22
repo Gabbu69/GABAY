@@ -1,0 +1,115 @@
+{% load static %}
+<!doctype html>
+<html lang="{{ ui_language }}" data-online-state="unknown">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#073f2d">
+  <meta name="description" content="GABAY: transparent palay price guidance for farmers in M’lang, Cotabato.">
+  <meta name="color-scheme" content="light">
+  <title>{% block title %}GABAY{% endblock %} · M’lang Palay Price Guide</title>
+  <link rel="manifest" href="{% static 'manifest.webmanifest' %}">
+  <link rel="icon" href="{% static 'images/gabay-mark.svg' %}" type="image/svg+xml">
+  <link rel="stylesheet" href="{% static 'css/gabay.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  <a class="skip-link" href="#main-content">{{ ui.skip }}</a>
+
+  <div class="network-banner" id="offline-banner" role="status" aria-live="polite" hidden>
+    <span class="status-dot" aria-hidden="true"></span>
+    <strong>{{ ui.offline }}</strong>
+    <span>{{ ui.offline_banner }}</span>
+  </div>
+
+  {% if is_demo_profile or page_is_demo %}
+    <div class="demo-banner" role="status">
+      <span class="badge-icon" aria-hidden="true">D</span>
+      <strong>{{ ui.demo }}</strong>
+      <span>{{ ui.demo_banner }}</span>
+    </div>
+  {% endif %}
+
+  <header class="site-header" data-site-header>
+    <div class="shell header-inner">
+      <a class="brand" href="{% url 'portal:home' %}" aria-label="GABAY home">
+        <span class="brand-mark" aria-hidden="true">
+          <img src="{% static 'images/gabay-mark.svg' %}" width="42" height="42" alt="">
+        </span>
+        <span class="brand-lockup">
+          <strong>GABAY</strong>
+          <small>{{ ui.brand_tagline }}</small>
+        </span>
+      </a>
+
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">
+        <span class="sr-only">{{ ui.menu }}</span>
+        <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+      </button>
+
+      <nav class="primary-nav" id="primary-nav" aria-label="Primary navigation">
+        <a href="{% url 'portal:home' %}" {% if request.resolver_match.url_name == 'home' %}aria-current="page"{% endif %}>{{ ui.home }}</a>
+        <a href="{% url 'portal:history' %}" {% if request.resolver_match.url_name == 'history' %}aria-current="page"{% endif %}>{{ ui.history }}</a>
+        <a href="{% url 'portal:check-offer' %}" {% if request.resolver_match.url_name == 'check-offer' %}aria-current="page"{% endif %}>{{ ui.check_offer }}</a>
+        <a href="{% url 'portal:methodology' %}" {% if request.resolver_match.url_name == 'methodology' %}aria-current="page"{% endif %}>{{ ui.methodology }}</a>
+      </nav>
+
+      <div class="header-actions">
+        <form action="{% url 'portal:set-language' %}" method="post" class="language-form">
+          {% csrf_token %}
+          <input type="hidden" name="language" value="{{ ui.language_code }}">
+          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+          <button class="language-button" type="submit">{{ ui.language }}</button>
+        </form>
+        {% if request.user.is_authenticated %}
+          <a class="staff-link" href="{% url 'portal:manage-dashboard' %}">{{ ui.management }}</a>
+        {% else %}
+          <a class="staff-link" href="{% url 'portal:login' %}">{{ ui.login }}</a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  {% if messages %}
+    <div class="shell messages" aria-live="polite">
+      {% for message in messages %}<div class="message {{ message.tags }}">{{ message }}</div>{% endfor %}
+    </div>
+  {% endif %}
+
+  <main id="main-content" tabindex="-1">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-grid">
+      <div>
+        <a class="brand brand-footer" href="{% url 'portal:home' %}">
+          <span class="brand-mark" aria-hidden="true">
+            <img src="{% static 'images/gabay-mark.svg' %}" width="42" height="42" alt="">
+          </span>
+          <span class="brand-lockup"><strong>GABAY</strong><small>{{ ui.footer_location }}</small></span>
+        </a>
+      </div>
+      <div class="footer-disclaimer">
+        <strong>{% if ui_language == 'tl' %}Mahalagang paalala{% else %}Important reminder{% endif %}</strong>
+        <p>{{ ui.disclaimer }}</p>
+      </div>
+      <div class="footer-links">
+        <a href="{% url 'portal:methodology' %}">{{ ui.methodology }}</a>
+        <a href="{% url 'portal:history' %}">{{ ui.history }}</a>
+        {% if request.user.is_authenticated %}
+          <form action="{% url 'portal:logout' %}" method="post">{% csrf_token %}<button type="submit">{{ ui.logout }}</button></form>
+        {% else %}
+          <a href="{% url 'portal:login' %}">{{ ui.login }}</a>
+        {% endif %}
+      </div>
+    </div>
+    <div class="shell footer-bottom">
+      <span>© {% now "Y" %} GABAY Thesis Project</span>
+      <span>{{ ui.privacy_note }}</span>
+    </div>
+  </footer>
+  <script src="{% static 'js/gabay.js' %}" defer></script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

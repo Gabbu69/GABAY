@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ui.management }}{% endblock %}
+{% block body_class %}interior-page management-page{% endblock %}
+
+{% block content %}
+<section class="page-mast shell manage-mast">
+  <div>
+    <p class="eyebrow dark"><span aria-hidden="true">✦</span> GABAY MANAGEMENT</p>
+    <h1>{% if ui_language == 'tl' %}Magandang araw, <em>{{ request.user.get_short_name|default:request.user.username }}.</em>{% else %}Welcome back, <em>{{ request.user.get_short_name|default:request.user.username }}.</em>{% endif %}</h1>
+    <p>{% if ui_language == 'tl' %}Dito nagsisimula ang beripikadong daloy ng presyo, pananaliksik, at audit-ready na ebidensiya.{% else %}This is the starting point for verified price workflows, research runs, and audit-ready evidence.{% endif %}</p>
+  </div>
+  <div class="user-seal"><span aria-hidden="true">{{ request.user.username|first|upper }}</span><div><small>{% if ui_language == 'tl' %}Naka-sign in bilang{% else %}Signed in as{% endif %}</small><strong>{{ request.user.username }}</strong>{% if roles %}<p>{{ roles|join:", " }}</p>{% endif %}</div></div>
+</section>
+
+<section class="section-tight shell manage-grid">
+  {% if can_manage_prices %}
+  <a class="manage-action primary-action" href="/manage/prices/">
+    <span class="action-number">01</span><span class="action-icon" aria-hidden="true">＋</span>
+    <div><h2>{% if ui_language == 'tl' %}Mga tala ng presyo{% else %}Price records{% endif %}</h2><p>{% if ui_language == 'tl' %}Mag-encode, mag-import, mag-review, at magberipika ng lokal na presyo.{% else %}Encode, import, review, and verify local price observations.{% endif %}</p></div><span class="action-arrow" aria-hidden="true">→</span>
+  </a>
+  {% endif %}
+  {% if can_manage_research %}
+  <a class="manage-action" href="/manage/research/">
+    <span class="action-number">02</span><span class="action-icon" aria-hidden="true">∿</span>
+    <div><h2>{% if ui_language == 'tl' %}Laboratoryo ng taya{% else %}Forecast laboratory{% endif %}</h2><p>{% if ui_language == 'tl' %}Patakbuhin ang paghahambing, suriin ang metrics, at ilathala ang resulta.{% else %}Run comparisons, inspect metrics, and publish a result.{% endif %}</p></div><span class="action-arrow" aria-hidden="true">→</span>
+  </a>
+  {% endif %}
+</section>
+
+<section class="section shell management-status">
+  <header class="section-heading split-heading">
+    <div><p class="eyebrow dark"><span aria-hidden="true">✦</span> {% if ui_language == 'tl' %}Kalagayan ng publikasyon{% else %}Publication status{% endif %}</p><h2>{% if ui_language == 'tl' %}Ano ang nakikita <em>ng publiko ngayon.</em>{% else %}What the public <em>can see now.</em>{% endif %}</h2></div>
+    <a class="button button-outline" href="{% url 'portal:home' %}" target="_blank" rel="noopener">{% if ui_language == 'tl' %}Buksan ang publiko{% else %}Open public view{% endif %} <span aria-hidden="true">↗</span></a>
+  </header>
+  <div class="status-cards">
+    <article>
+      <span class="status-card-icon {% if prices.has_verified_local_data %}good{% else %}muted{% endif %}" aria-hidden="true">{% if prices.has_verified_local_data %}✓{% else %}—{% endif %}</span>
+      <div><small>{% if ui_language == 'tl' %}Lokal na presyo{% else %}Local price{% endif %}</small><h3>{% if prices.has_verified_local_data %}{% if ui_language == 'tl' %}May beripikadong datos{% else %}Verified data available{% endif %}{% else %}{% if ui_language == 'tl' %}Wala pang nailathala{% else %}Nothing published yet{% endif %}{% endif %}</h3>{% if prices.selected.latest %}<p>₱{{ prices.selected.latest.price|floatformat:2 }} {{ ui.php_kg }}</p>{% endif %}</div>
+    </article>
+    <article>
+      <span class="status-card-icon {% if forecast.available %}good{% else %}muted{% endif %}" aria-hidden="true">{% if forecast.available %}∿{% else %}—{% endif %}</span>
+      <div><small>{{ ui.forecast }}</small><h3>{% if forecast.available %}{% if ui_language == 'tl' %}May nailathalang taya{% else %}Published forecast available{% endif %}{% else %}{% if ui_language == 'tl' %}Hindi sapat ang ebidensiya{% else %}Evidence is insufficient{% endif %}{% endif %}</h3><p>{% if forecast.available %}{{ forecast.decision }} · {{ forecast.reliability }}{% else %}MONITOR · UNASSESSED{% endif %}</p></div>
+    </article>
+    <article>
+      <span class="status-card-icon good" aria-hidden="true">◎</span>
+      <div><small>{% if ui_language == 'tl' %}Profile ng sistema{% else %}System profile{% endif %}</small><h3>{{ gabay_profile|upper }}</h3><p>{% if ui_language == 'tl' %}Aktibong configuration{% else %}Active configuration{% endif %}</p></div>
+    </article>
+  </div>
+</section>
+{% endblock %}

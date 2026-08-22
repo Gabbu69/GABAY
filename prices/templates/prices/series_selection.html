@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}Public series selection | GABAY{% endblock %}
+
+{% block content %}
+<main class="page-shell management-page narrow-page">
+  <header class="page-header"><div><p class="eyebrow">Research control</p><h1>Choose a primary public series</h1><p>GABAY never switches palay classification, condition, or location automatically. Selecting a series replaces only the current selection in the same data scope.</p></div></header>
+  <section class="panel"><h2>Current selections</h2><ul class="record-list">{% for series in primary_series %}<li><strong>{{ series.get_scope_display }}</strong><span>{{ series.name }} · {{ series.get_classification_display }} · {{ series.get_condition_display }}{% if series.moisture_basis %} · {{ series.moisture_basis }}% moisture{% endif %}</span></li>{% empty %}<li>No explicit selections yet.</li>{% endfor %}</ul></section>
+  <form class="panel form-panel" method="post" novalidate>{% csrf_token %}{{ form.non_field_errors }}<div class="form-field">{{ form.series.label_tag }}{{ form.series }}<small>{{ form.series.help_text }}</small>{{ form.series.errors }}</div><div class="button-row"><button class="button button-primary" type="submit">Use this public series</button><a class="button button-ghost" href="{% url 'prices:dashboard' %}">Cancel</a></div></form>
+</main>
+{% endblock %}

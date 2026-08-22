@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ ui.methodology }}{% endblock %}
+{% block body_class %}interior-page methodology-page{% endblock %}
+
+{% block content %}
+<section class="page-mast shell methodology-mast">
+  <div>
+    <p class="eyebrow dark"><span aria-hidden="true">✦</span> {% if ui_language == 'tl' %}Bukas na pamamaraan{% else %}Open methodology{% endif %}</p>
+    <h1>{% if ui_language == 'tl' %}Hindi kahon na itim. <em>Masusundan ang bawat hakbang.</em>{% else %}No black box. <em>Every step can be traced.</em>{% endif %}</h1>
+    <p>{% if ui_language == 'tl' %}Mula sa orihinal na tala hanggang sa resulta, ipinapakita ng GABAY kung anong datos, modelo, error, at panuntunan ang ginamit.{% else %}From the original observation to the result, GABAY records which data, model, error measure, and rule version were used.{% endif %}</p>
+  </div>
+  <div class="method-mark" aria-hidden="true"><img src="{% static 'images/rice-sprig.svg' %}" width="150" height="220" alt=""></div>
+</section>
+
+<section class="section-tight shell">
+  <ol class="method-flow" aria-label="{% if ui_language == 'tl' %}Daloy ng pamamaraan{% else %}Method flow{% endif %}">
+    <li><span>01</span><div><strong>{% if ui_language == 'tl' %}Kolektahin{% else %}Collect{% endif %}</strong><p>{% if ui_language == 'tl' %}Presyo, petsa, uri, kondisyon, yunit, lugar, at pinagmulan.{% else %}Price, date, classification, condition, unit, location, and source.{% endif %}</p></div></li>
+    <li><span>02</span><div><strong>{% if ui_language == 'tl' %}Beripikahin{% else %}Verify{% endif %}</strong><p>{% if ui_language == 'tl' %}Ibang account ang nag-aapruba; hindi puwedeng sarili ang tala.{% else %}A separate account approves; no one may verify their own record.{% endif %}</p></div></li>
+    <li><span>03</span><div><strong>{% if ui_language == 'tl' %}Subukan{% else %}Backtest{% endif %}</strong><p>{% if ui_language == 'tl' %}Sunod-sunod na nakaraang linggo, walang random na paghahati.{% else %}Chronological past weeks, never a random split.{% endif %}</p></div></li>
+    <li><span>04</span><div><strong>{% if ui_language == 'tl' %}Ipaliwanag{% else %}Explain{% endif %}</strong><p>{% if ui_language == 'tl' %}Resulta lamang kapag nagtutugma ang mga senyales.{% else %}A direction only when the signals agree.{% endif %}</p></div></li>
+  </ol>
+</section>
+
+<section class="section section-tint">
+  <div class="shell method-grid">
+    <article class="method-prose">
+      <p class="eyebrow dark"><span aria-hidden="true">✦</span> {% if ui_language == 'tl' %}01 · Hangganan ng datos{% else %}01 · Data boundary{% endif %}</p>
+      <h2>{% if ui_language == 'tl' %}Magkapareho muna <em>bago paghambingin.</em>{% else %}Comparable first, <em>then combined.</em>{% endif %}</h2>
+      <p>{% if ui_language == 'tl' %}Hindi pinaghahalo ang magkaibang lugar, klase ng palay, basa o tuyo, moisture basis, at lokal o pansanggunian na saklaw. Ginagawang PHP kada kilo ang yunit kung may malinaw na batayan lamang.{% else %}Different locations, palay classifications, wet/dry conditions, moisture bases, and local/reference scopes are never mixed. Units are converted to PHP per kilogram only when an explicit basis exists.{% endif %}</p>
+      <ul class="check-list">
+        <li><span aria-hidden="true">✓</span>{% if ui_language == 'tl' %}Eksaktong duplicate: pinagsasama nang isang beses{% else %}Exact duplicates: collapsed once{% endif %}</li>
+        <li><span aria-hidden="true">!</span>{% if ui_language == 'tl' %}Magkasalungat na duplicate: para sa pagsusuri{% else %}Conflicting duplicates: held for review{% endif %}</li>
+        <li><span aria-hidden="true">○</span>{% if ui_language == 'tl' %}Outlier: minamarkahan, hindi tahimik na binubura{% else %}Outliers: flagged, never silently deleted{% endif %}</li>
+      </ul>
+    </article>
+    <aside class="method-card dark-card">
+      <span class="card-number">WEEKLY / LOCAL</span>
+      <h3>{% if ui_language == 'tl' %}Lingguhang median ng M’lang{% else %}M’lang weekly median{% endif %}</h3>
+      <p>{% if ui_language == 'tl' %}Kasama ang minimum, maximum, bilang, at pinakahuling petsa ng obserbasyon para hindi maitago ng iisang numero ang kalidad ng datos.{% else %}Minimum, maximum, count, and latest observation date travel with the median so one number cannot hide data quality.{% endif %}</p>
+      <div class="formula"><span>{% if ui_language == 'tl' %}Linggo{% else %}Week{% endif %}</span><b>→</b><span>Median</span><b>+</b><span>Range</span><b>+</b><span>n</span></div>
+    </aside>
+  </div>
+</section>
+
+<section class="section shell">
+  <header class="section-heading split-heading">
+    <div><p class="eyebrow dark"><span aria-hidden="true">✦</span> {% if ui_language == 'tl' %}02 · Paghahambing ng modelo{% else %}02 · Model comparison{% endif %}</p><h2>{% if ui_language == 'tl' %}Pinakasimple, <em>hangga’t ito ang pinakamahusay.</em>{% else %}Simplest, <em>as long as it performs best.</em>{% endif %}</h2></div>
+    <p>{% if ui_language == 'tl' %}Parehong nakaraang linggo ang ginagamit sa bawat modelo. Maaaring manalo ang simpleng huling-presyo na baseline.{% else %}Every model sees the same past weeks. The simple last-price baseline is allowed to win.{% endif %}</p>
+  </header>
+  <div class="model-cards">
+    <article><span>01</span><h3>Last-value baseline</h3><p>{% if ui_language == 'tl' %}Ang susunod na presyo ay katulad ng pinakahuli.{% else %}Next week equals the most recent price.{% endif %}</p></article>
+    <article><span>02</span><h3>4-week moving average</h3><p>{% if ui_language == 'tl' %}Pantay na timbang ng apat na nakaraang linggo.{% else %}Equal weight across the previous four weeks.{% endif %}</p></article>
+    <article><span>03</span><h3>Exponential smoothing</h3><p>{% if ui_language == 'tl' %}Mas mabigat ang kamakailang obserbasyon.{% else %}More weight on recent observations.{% endif %}</p></article>
+    <article><span>04</span><h3>Bounded ARIMA</h3><p>{% if ui_language == 'tl' %}Limitadong kandidato para manatiling mabilis at maulit.{% else %}Limited candidates to remain fast and reproducible.{% endif %}</p></article>
+  </div>
+  <div class="evaluation-strip">
+    <div><strong>52</strong><span>{% if ui_language == 'tl' %}unang linggo ng pagsasanay{% else %}initial training weeks{% endif %}</span></div>
+    <div><strong>12</strong><span>{% if ui_language == 'tl' %}sunod-sunod na pagsusulit{% else %}rolling test folds{% endif %}</span></div>
+    <div><strong>MAE</strong><span>{% if ui_language == 'tl' %}pangunahing sukatan{% else %}primary selection metric{% endif %}</span></div>
+    <div><strong>80%</strong><span>{% if ui_language == 'tl' %}empirical na pagitan{% else %}empirical interval{% endif %}</span></div>
+  </div>
+</section>
+
+<section class="section decision-method">
+  <div class="shell">
+    <header class="section-heading split-heading light-heading">
+      <div><p class="eyebrow light"><span aria-hidden="true">✦</span> {% if ui_language == 'tl' %}03 · Panuntunan ng pasya{% else %}03 · Decision rules{% endif %}</p><h2>{% if ui_language == 'tl' %}Tatlong senyales. <em>Isang maingat na resulta.</em>{% else %}Three signals. <em>One cautious result.</em>{% endif %}</h2></div>
+      <p>{% if ui_language == 'tl' %}Ang mga threshold na ito ay DRAFT-v1 hanggang aprubahan at i-freeze ng adviser para sa ebalwasyon.{% else %}These thresholds remain DRAFT-v1 until adviser approval freezes an evaluation version.{% endif %}</p>
+    </header>
+    <div class="signal-grid">
+      <article><span class="signal-number">01</span><h3>{% if ui_language == 'tl' %}Boto ng taya{% else %}Forecast vote{% endif %}</h3><p><strong>WAIT ≥ +3%</strong><br><strong>SELL ≤ −3%</strong></p></article>
+      <article><span class="signal-number">02</span><h3>{% if ui_language == 'tl' %}Takbo ng presyo{% else %}Recent trend{% endif %}</h3><p>{% if ui_language == 'tl' %}Huling 2-linggong median laban sa naunang 2 linggo{% else %}Latest 2-week median versus the preceding 2 weeks{% endif %}<br><strong>±1%</strong></p></article>
+      <article><span class="signal-number">03</span><h3>{% if ui_language == 'tl' %}Konteksto ng presyo{% else %}Price context{% endif %}</h3><p>{% if ui_language == 'tl' %}Kasalukuyan laban sa naunang 8-linggong median{% else %}Current versus preceding 8-week median{% endif %}<br><strong>±3%</strong></p></article>
+    </div>
+    <div class="rule-callout"><span class="result-icon" aria-hidden="true">↔</span><div><strong>{% if ui_language == 'tl' %}Default sa MONITOR{% else %}MONITOR is the safe default{% endif %}</strong><p>{% if ui_language == 'tl' %}Kailangan ng boto ng taya, kahit isang sumusuportang senyales, at walang salungat na senyales bago maglabas ng SELL o WAIT. Awtomatikong MONITOR kapag luma, kulang, mababa ang reliability, o masyadong malawak ang pagitan.{% else %}SELL or WAIT needs the forecast vote, at least one supporting signal, and no opposing signal. Stale, insufficient, low-reliability, or overly uncertain evidence forces MONITOR.{% endif %}</p></div></div>
+  </div>
+</section>
+
+<section class="section shell ethics-section">
+  <div><p class="eyebrow dark"><span aria-hidden="true">✦</span> {% if ui_language == 'tl' %}Hangganan ng pananagutan{% else %}Responsibility boundary{% endif %}</p><h2>{% if ui_language == 'tl' %}Ang huling pasya ay <em>nasa magsasaka.</em>{% else %}The final decision stays <em>with the farmer.</em>{% endif %}</h2></div>
+  <div class="ethics-card"><p>{{ ui.disclaimer }}</p><a class="button button-green" href="{% url 'portal:check-offer' %}">{{ ui.check_offer }} <span aria-hidden="true">→</span></a></div>
+</section>
+{% endblock %}

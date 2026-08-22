@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Observations | GABAY{% endblock %}
+
+{% block content %}
+<main class="page-shell management-page">
+  <header class="page-header">
+    <div><p class="eyebrow">Evidence register</p><h1>Price observations</h1><p>Every correction is a new revision; original evidence stays in the audit history.</p></div>
+    {% if can_encode %}<a class="button button-primary" href="{% url 'prices:observation-create' %}">Add evidence</a>{% endif %}
+  </header>
+
+  <nav class="filter-row" aria-label="Filter observations">
+    <a {% if not selected_status %}aria-current="page"{% endif %} href="{% url 'prices:observation-list' %}">All</a>
+    {% for value, label in statuses %}<a {% if selected_status == value %}aria-current="page"{% endif %} href="?status={{ value }}">{{ label }}</a>{% endfor %}
+  </nav>
+
+  <section class="panel">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Date</th><th>Scope</th><th>Series</th><th>Source</th><th>PHP/kg</th><th>Revision</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for item in observations %}
+            <tr>
+              <td><a href="{% url 'prices:observation-detail' item.public_id %}">{{ item.observed_on }}</a></td>
+              <td>{{ item.series.get_scope_display }}</td><td>{{ item.series.name }}</td><td>{{ item.source.name }}</td>
+              <td>{{ item.normalized_price|floatformat:2 }}</td><td>v{{ item.revision }}{% if not item.is_current %} · superseded{% endif %}</td>
+              <td><span class="status-chip status-{{ item.workflow_status }}">{{ item.get_workflow_status_display }}</span></td>
+            </tr>
+          {% empty %}<tr><td colspan="7">No matching observations.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+{% endblock %}

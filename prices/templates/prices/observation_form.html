@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}{% if mode == "revision" %}Revise evidence{% else %}Add evidence{% endif %} | GABAY{% endblock %}
+
+{% block content %}
+<main class="page-shell management-page narrow-page">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Maker step</p>
+      <h1>{% if mode == "revision" %}Submit a correction{% else %}Add price evidence{% endif %}</h1>
+      <p>{% if mode == "revision" %}The current verified value remains public until a different account approves this revision.{% else %}A different verifier must approve this record before it can appear publicly.{% endif %}</p>
+    </div>
+  </header>
+  <form class="panel form-panel" method="post" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="alert alert-error">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="form-grid">
+      {% for field in form %}
+        <div class="form-field {% if field.name == 'notes' or field.name == 'reason' %}form-field-wide{% endif %}">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+          {% for error in field.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+        </div>
+      {% endfor %}
+    </div>
+    <div class="button-row"><button class="button button-primary" type="submit">Submit for verification</button><a class="button button-ghost" href="{% url 'prices:observation-list' %}">Cancel</a></div>
+  </form>
+</main>
+{% endblock %}

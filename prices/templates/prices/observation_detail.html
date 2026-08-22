@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Evidence {{ observation.public_id }} | GABAY{% endblock %}
+
+{% block content %}
+<main class="page-shell management-page">
+  <header class="page-header">
+    <div><p class="eyebrow">{{ observation.series.get_scope_display }}</p><h1>PHP {{ observation.normalized_price|floatformat:2 }} per kg</h1><p>{{ observation.series.name }} · observed {{ observation.observed_on }}</p></div>
+    <span class="status-chip status-{{ observation.workflow_status }}">{{ observation.get_workflow_status_display }}</span>
+  </header>
+
+  {% if observation.is_demo %}<div class="alert alert-warning"><strong>Demonstration data—not verified market information.</strong></div>{% endif %}
+  {% if observation.is_outlier %}<div class="alert alert-warning">This value was flagged as an outlier and requires explicit evidence checking.</div>{% endif %}
+  {% if observation.is_conflict %}<div class="alert alert-warning">This value conflicts with evidence using the same source, date, and reference. It remains quarantined until explicitly reconciled.</div>{% endif %}
+
+  <section class="content-grid">
+    <article class="panel definition-panel">
+      <h2>Evidence details</h2>
+      <dl>
+        <div><dt>Original value</dt><dd>{{ observation.original_price }} per {{ observation.original_unit }}{% if observation.container_weight_kg %} ({{ observation.container_weight_kg }} kg){% endif %}</dd></div>
+        <div><dt>Source</dt><dd>{{ observation.source.name }}</dd></div>
+        <div><dt>Classification</dt><dd>{{ observation.series.get_classification_display }}</dd></div>
+        <div><dt>Condition</dt><dd>{{ observation.series.get_condition_display }}{% if observation.series.moisture_basis %} · {{ observation.series.moisture_basis }}% moisture basis{% endif %}</dd></div>
+        <div><dt>Location basis</dt><dd>{{ observation.series.location_name }} · {{ observation.series.get_location_level_display }}</dd></div>
+        <div><dt>Source reference</dt><dd>{{ observation.source_reference }}</dd></div>
+        <div><dt>Collection method</dt><dd>{{ observation.collection_method|default:"Not supplied" }}</dd></div>
+        <div><dt>Entered by</dt><dd>{{ observation.created_by|default:"System importer" }}</dd></div>
+        <div><dt>Revision</dt><dd>v{{ observation.revision }}{% if observation.supersedes %}, correcting {{ observation.supersedes.public_id }}{% endif %}</dd></div>
+      </dl>
+      {% if observation.notes %}<h3>Notes</h3><p>{{ observation.notes }}</p>{% endif %}
+      {% if can_encode and observation.workflow_status == "verified" and observation.is_current %}<a class="button button-secondary" href="{% url 'prices:observation-revise' observation.public_id %}">Create correction</a>{% endif %}
+    </article>
+
+    <aside class="panel">
+      <h2>Verification trail</h2>
+      <ol class="timeline">
+        {% for event in events %}<li><strong>{{ event.get_action_display }}</strong><span>{{ event.created_at }} · {{ event.actor|default:"System" }}</span>{% if event.reason %}<p>{{ event.reason }}</p>{% endif %}</li>{% empty %}<li>No events recorded.</li>{% endfor %}
+      </ol>
+      {% if can_verify and observation.workflow_status == "pending" %}
+        {% if is_own %}
+          <div class="alert alert-warning">Maker-checker control: you cannot decide your own entry.</div>
+        {% else %}
+          <form method="post" action="{% url 'prices:observation-approve' observation.public_id %}">{% csrf_token %}{{ verification_form.reason.label_tag }}{{ verification_form.reason }}{% if observation.is_outlier %}<label>{{ verification_form.accept_outlier }} Evidence outlier checked against the original source</label>{% endif %}{% if observation.is_conflict %}<label>{{ verification_form.accept_conflict }} Conflicting evidence reconciled</label>{% endif %}<button class="button button-primary" type="submit">Approve evidence</button></form>
+          <form method="post" action="{% url 'prices:observation-reject' observation.public_id %}">{% csrf_token %}{{ rejection_form.reason.label_tag }}{{ rejection_form.reason }}<button class="button button-danger" type="submit">Reject with reason</button></form>
+        {% endif %}
+      {% endif %}
+    </aside>
+  </section>
+</main>
+{% endblock %}

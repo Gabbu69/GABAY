@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Stage CSV | GABAY{% endblock %}
+
+{% block content %}
+<main class="page-shell management-page narrow-page">
+  <header class="page-header"><div><p class="eyebrow">Maker step</p><h1>Stage a price CSV</h1><p>Choose one compatible series and source. No uploaded row is published automatically.</p></div></header>
+  <section class="panel guidance-card"><h2>Before uploading</h2><ul><li>Use UTF-8 CSV with ISO dates (<code>YYYY-MM-DD</code>).</li><li>Provide explicit container weight for bag, sack, or cavan prices.</li><li>Keep municipality data separate from PSA provincial references.</li></ul><a href="{% url 'prices:csv-template' %}">Download the exact column template</a></section>
+  <form class="panel form-panel" method="post" enctype="multipart/form-data" novalidate>{% csrf_token %}
+    {% if form.non_field_errors %}<div class="alert alert-error">{{ form.non_field_errors }}</div>{% endif %}
+    {% for field in form %}<div class="form-field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<p class="field-error">{{ error }}</p>{% endfor %}</div>{% endfor %}
+    <div class="button-row"><button class="button button-primary" type="submit">Validate and stage</button><a class="button button-ghost" href="{% url 'prices:import-list' %}">Cancel</a></div>
+  </form>
+</main>
+{% endblock %}

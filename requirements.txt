@@ -1,0 +1,8 @@
+Django>=5.2,<5.3
+gunicorn>=23,<24; platform_system != "Windows"
+numpy>=2.2,<3
+psycopg[binary]>=3.2,<4
+scipy>=1.15,<2
+statsmodels>=0.14.4,<0.15
+waitress>=3,<4
+whitenoise>=6.9,<7

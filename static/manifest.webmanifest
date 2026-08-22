@@ -1,0 +1,21 @@
+{
+  "name": "GABAY Palay Price Guide",
+  "short_name": "GABAY",
+  "description": "Transparent palay price guidance for M’lang, Cotabato.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f5f2e9",
+  "theme_color": "#073f2d",
+  "lang": "en",
+  "categories": ["education", "business", "utilities"],
+  "icons": [
+    {
+      "src": "/static/images/gabay-mark.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

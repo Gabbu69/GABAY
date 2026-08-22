@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 220" role="img" aria-labelledby="title">
+  <title id="title">Rice sprig motif</title>
+  <g fill="none" stroke="#f8c642" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M39 207c26-48 38-101 47-183" stroke-width="4"/>
+    <path d="M76 74c-18-8-32-21-40-38M73 90c19-8 33-20 43-37M68 111c-17-5-31-14-42-29M64 132c18-4 35-13 48-26M58 153c-14-3-27-10-38-20M53 174c14-3 28-10 39-21" stroke-width="2.5"/>
+  </g>
+  <g fill="#f8c642">
+    <ellipse cx="39" cy="38" rx="4" ry="10" transform="rotate(-45 39 38)"/><ellipse cx="49" cy="49" rx="4" ry="10" transform="rotate(-50 49 49)"/><ellipse cx="59" cy="58" rx="4" ry="10" transform="rotate(-54 59 58)"/>
+    <ellipse cx="112" cy="56" rx="4" ry="10" transform="rotate(45 112 56)"/><ellipse cx="101" cy="67" rx="4" ry="10" transform="rotate(50 101 67)"/><ellipse cx="90" cy="76" rx="4" ry="10" transform="rotate(55 90 76)"/>
+    <ellipse cx="29" cy="84" rx="4" ry="10" transform="rotate(-55 29 84)"/><ellipse cx="41" cy="95" rx="4" ry="10" transform="rotate(-60 41 95)"/><ellipse cx="53" cy="103" rx="4" ry="10" transform="rotate(-65 53 103)"/>
+    <ellipse cx="109" cy="109" rx="4" ry="10" transform="rotate(55 109 109)"/><ellipse cx="96" cy="120" rx="4" ry="10" transform="rotate(62 96 120)"/><ellipse cx="82" cy="127" rx="4" ry="10" transform="rotate(68 82 127)"/>
+    <ellipse cx="23" cy="135" rx="4" ry="10" transform="rotate(-65 23 135)"/><ellipse cx="37" cy="145" rx="4" ry="10" transform="rotate(-70 37 145)"/>
+    <ellipse cx="90" cy="157" rx="4" ry="10" transform="rotate(65 90 157)"/><ellipse cx="75" cy="167" rx="4" ry="10" transform="rotate(70 75 167)"/>
+  </g>
+</svg>

@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ui.history }}{% endblock %}
+{% block body_class %}interior-page history-page{% endblock %}
+
+{% block content %}
+<section class="page-mast shell">
+  <div>
+    <p class="eyebrow dark"><span aria-hidden="true">✦</span> {% if ui_language == 'tl' %}Talaan ng presyo{% else %}Price record{% endif %}</p>
+    <h1>{% if ui_language == 'tl' %}Kasaysayan na <em>may pinagmulan.</em>{% else %}History with <em>provenance.</em>{% endif %}</h1>
+    <p>{% if ui_language == 'tl' %}Tingnan ang bawat lingguhang median, aktuwal na saklaw, dami ng obserbasyon, at pinagmulan. Magkahiwalay ang lokal, opisyal na sanggunian, at demonstrasyong datos.{% else %}Inspect each weekly median, observed range, sample count, and source. Local, official reference, and demonstration data remain visibly separate.{% endif %}</p>
+  </div>
+  <div class="mast-index" aria-hidden="true"><span>02</span><i></i><span>PRICE RECORD</span></div>
+</section>
+
+<section class="section-tight shell">
+  <nav class="scope-tabs" aria-label="{% if ui_language == 'tl' %}Piliin ang uri ng datos{% else %}Choose dataset type{% endif %}">
+    <a href="?scope=local" {% if history_scope == 'local' %}aria-current="page"{% endif %}>
+      <span aria-hidden="true">●</span>{{ ui.verified }}
+      {% if prices.sections.local.available %}<small>{% if ui_language == 'tl' %}may datos{% else %}available{% endif %}</small>{% endif %}
+    </a>
+    <a href="?scope=reference" {% if history_scope == 'reference' %}aria-current="page"{% endif %}>
+      <span aria-hidden="true">◆</span>{{ ui.reference }}
+      {% if prices.sections.reference.available %}<small>{% if ui_language == 'tl' %}may datos{% else %}available{% endif %}</small>{% endif %}
+    </a>
+    <a href="?scope=demo" {% if history_scope == 'demo' %}aria-current="page"{% endif %}>
+      <span aria-hidden="true">D</span>{{ ui.demo }}
+      {% if prices.sections.demo.available %}<small>{% if ui_language == 'tl' %}may datos{% else %}available{% endif %}</small>{% endif %}
+    </a>
+  </nav>
+
+  {% if history_scope == 'reference' %}
+    <div class="boundary-note reference-boundary" role="note">
+      <span class="round-icon" aria-hidden="true">i</span>
+      <div><strong>{% if ui_language == 'tl' %}Hiwalay na opisyal na sanggunian{% else %}Separate official reference{% endif %}</strong><p>{% if ui_language == 'tl' %}Ang buwanang presyo ng PSA Cotabato ay konteksto lamang. Hindi ito lokal na presyo ng M’lang at hindi ginagamit bilang tahimik na kapalit sa lingguhang taya.{% else %}PSA Cotabato monthly prices provide context only. They are not M’lang local prices and never silently replace the weekly forecast series.{% endif %}</p></div>
+    </div>
+  {% elif history_scope == 'demo' %}
+    <div class="boundary-note demo-boundary" role="note">
+      <span class="round-icon" aria-hidden="true">D</span>
+      <div><strong>{{ ui.demo_banner }}</strong><p>{% if ui_language == 'tl' %}Sintetiko ang seryeng ito at para lamang sa demonstrasyon at pagsubok ng sistema.{% else %}This series is synthetic and exists only for system demonstration and testing.{% endif %}</p></div>
+    </div>
+  {% endif %}
+
+  <article class="history-panel">
+    <header class="history-panel-head">
+      <div>
+        <span class="data-seal {% if history_scope == 'local' %}verified{% elif history_scope == 'demo' %}demo{% else %}neutral{% endif %}">
+          {% if history_scope == 'local' %}<span aria-hidden="true">✓</span>{{ ui.verified }}{% elif history_scope == 'reference' %}<span aria-hidden="true">◆</span>{{ ui.reference }}{% else %}<span aria-hidden="true">D</span>{{ ui.demo }}{% endif %}
+        </span>
+        <h2>{% if ui_language == 'tl' %}Takbo ng presyo{% else %}Price movement{% endif %}</h2>
+      </div>
+      <dl class="panel-summary">
+        <div><dt>{% if ui_language == 'tl' %}Mga punto{% else %}Data points{% endif %}</dt><dd>{{ chart.count }}</dd></div>
+        <div><dt>{{ ui.source }}</dt><dd>{% if history_section.source_count == 1 %}{{ history_section.source.name }}{% elif history_section.source_count > 1 %}{{ history_section.source_count }} {% if ui_language == 'tl' %}pinagmulan{% else %}sources{% endif %}{% else %}—{% endif %}</dd></div>
+        <div><dt>{% if ui_language == 'tl' %}Serye{% else %}Series{% endif %}</dt><dd>{% if history_section.series_metadata.name %}{{ history_section.series_metadata.classification_label }} · {{ history_section.series_metadata.condition_label }}{% else %}—{% endif %}</dd></div>
+      </dl>
+    </header>
+
+    {% if history_section.sources %}
+      <div class="boundary-note source-ledger" role="note">
+        <span class="round-icon" aria-hidden="true">◎</span>
+        <div>
+          <strong>{% if ui_language == 'tl' %}Mga pinagmulan ng seryeng ito{% else %}Sources contributing to this series{% endif %}</strong>
+          <ul>
+            {% for source in history_section.sources %}
+              <li><b>{{ source.name }}</b>{% if source.citation %} — {{ source.citation }}{% endif %}{% if source.reference %} <a href="{{ source.reference }}" rel="noopener noreferrer" target="_blank">{% if ui_language == 'tl' %}Sanggunian{% else %}Reference{% endif %} ↗</a>{% endif %}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    {% endif %}
+
+    {% if chart.points %}
+      <div class="chart-wrap history-chart-wrap">
+        <div class="chart-scale" aria-hidden="true"><span>₱{{ chart.maximum|floatformat:2 }}</span><span>₱{{ chart.minimum|floatformat:2 }}</span></div>
+        <svg class="price-chart" viewBox="0 0 720 220" role="img" aria-labelledby="history-chart-title history-chart-desc" preserveAspectRatio="none">
+          <title id="history-chart-title">{% if ui_language == 'tl' %}Kasaysayan ng presyo ng palay{% else %}Palay price history{% endif %}</title>
+          <desc id="history-chart-desc">{{ chart.count }} {% if ui_language == 'tl' %}punto mula ₱{{ chart.minimum|floatformat:2 }} hanggang ₱{{ chart.maximum|floatformat:2 }} kada kilo{% else %}points from ₱{{ chart.minimum|floatformat:2 }} to ₱{{ chart.maximum|floatformat:2 }} per kilogram{% endif %}</desc>
+          <g class="grid-lines" aria-hidden="true"><line x1="20" y1="20" x2="700" y2="20"/><line x1="20" y1="65" x2="700" y2="65"/><line x1="20" y1="110" x2="700" y2="110"/><line x1="20" y1="155" x2="700" y2="155"/><line x1="20" y1="200" x2="700" y2="200"/></g>
+          <polyline class="chart-shadow" points="{{ chart.points }}" vector-effect="non-scaling-stroke"/>
+          <polyline class="chart-line" points="{{ chart.points }}" vector-effect="non-scaling-stroke"/>
+        </svg>
+      </div>
+    {% else %}
+      <div class="chart-empty tall"><span aria-hidden="true">∿</span><strong>{{ ui.no_data }}</strong><p>{% if ui_language == 'tl' %}Pumili ng ibang uri ng datos o bumalik kapag may beripikadong tala na.{% else %}Choose another dataset type or return when verified records are available.{% endif %}</p></div>
+    {% endif %}
+
+    <div class="table-heading">
+      <div><h3>{% if ui_language == 'tl' %}Talahanayan ng mga obserbasyon{% else %}Observation table{% endif %}</h3><p>{% if ui_language == 'tl' %}Alternatibong nababasa sa chart; pinakabago muna.{% else %}A readable alternative to the chart; newest first.{% endif %}</p></div>
+      {% if history_section.latest %}<span class="status-chip neutral">{{ history_section.latest.count }} {{ ui.records }}</span>{% endif %}
+    </div>
+    <div class="table-scroll" tabindex="0" role="region" aria-label="{{ ui.history }}">
+      <table>
+        <thead><tr>
+          <th scope="col">{% if ui_language == 'tl' %}Linggo{% else %}Week{% endif %}</th>
+          <th scope="col">{% if ui_language == 'tl' %}Median{% else %}Median{% endif %}</th>
+          <th scope="col">{% if ui_language == 'tl' %}Aktuwal na saklaw{% else %}Observed range{% endif %}</th>
+          <th scope="col">{% if ui_language == 'tl' %}Bilang{% else %}Count{% endif %}</th>
+          <th scope="col">{{ ui.source }}</th>
+          <th scope="col">{% if ui_language == 'tl' %}Huling obserbasyon{% else %}Last observed{% endif %}</th>
+        </tr></thead>
+        <tbody>
+          {% for row in history_section.history reversed %}
+            <tr>
+              <th scope="row"><time datetime="{{ row.week_start|date:'Y-m-d' }}">{{ row.week_start|date:"M j, Y" }}</time></th>
+              <td class="table-price">₱{{ row.price|floatformat:2 }}</td>
+              <td>{% if row.low and row.high %}₱{{ row.low|floatformat:2 }}–₱{{ row.high|floatformat:2 }}{% else %}—{% endif %}</td>
+              <td>{{ row.count }}</td>
+              <td>{% for source in row.sources %}{{ source.name }}{% if not forloop.last %}; {% endif %}{% empty %}—{% endfor %}</td>
+              <td>{% if row.latest_observed_on %}{{ row.latest_observed_on|date:"M j, Y" }}{% else %}—{% endif %}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="6" class="empty-table">{{ ui.no_data }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+</section>
+{% endblock %}

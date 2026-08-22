@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{% if ui_language == 'tl' %}Gabay sa Presyo ng Palay{% else %}Palay Price Guide{% endif %}{% endblock %}
+{% block body_class %}public-home{% endblock %}
+
+{% block content %}
+<section class="hero shell" aria-labelledby="hero-title">
+  <div class="hero-media" aria-hidden="true">
+    <picture>
+      <source srcset="{% static 'images/gabay-palay-hero.webp' %}" type="image/webp">
+      <img src="{% static 'images/gabay-palay-hero.png' %}" width="1664" height="936" alt="" fetchpriority="high">
+    </picture>
+  </div>
+  <div class="hero-wash" aria-hidden="true"></div>
+  <div class="hero-grain" aria-hidden="true"></div>
+
+  <div class="hero-copy">
+    <p class="eyebrow light"><span aria-hidden="true">✦</span> M’lang, Cotabato · Palay decision support</p>
+    <h1 id="hero-title">
+      {% if ui_language == 'tl' %}
+        Presyo ng palay, <em>mas malinaw</em> ang batayan.
+      {% else %}
+        Palay prices, with a <em>clearer basis.</em>
+      {% endif %}
+    </h1>
+    <p class="hero-lede">
+      {% if ui_language == 'tl' %}
+        Pinagsasama ng GABAY ang beripikadong lokal na presyo, malinaw na taya, at simpleng paliwanag para makatulong sa tamang oras ng pagpapasya.
+      {% else %}
+        GABAY brings verified local prices, a transparent forecast, and plain-language reasons together—so timing decisions start with evidence.
+      {% endif %}
+    </p>
+    <div class="hero-actions">
+      <a class="button button-harvest" href="#weekly-guide">
+        {% if ui_language == 'tl' %}Tingnan ang gabay ngayong linggo{% else %}See this week’s guide{% endif %}
+        <span aria-hidden="true">→</span>
+      </a>
+      <a class="text-link light-link" href="{% url 'portal:methodology' %}">{{ ui.learn_more }} <span aria-hidden="true">↗</span></a>
+    </div>
+  </div>
+
+  <aside class="hero-price-card" aria-label="{{ ui.current_price }}">
+    <div class="card-kicker">
+      {% if prices.selected_scope == 'local' and prices.has_verified_local_data %}
+        <span class="data-seal verified"><span aria-hidden="true">✓</span> {{ ui.verified }}</span>
+      {% elif prices.selected_scope == 'demo' %}
+        <span class="data-seal demo"><span aria-hidden="true">D</span> {{ ui.demo }}</span>
+      {% else %}
+        <span class="data-seal neutral"><span aria-hidden="true">—</span> {{ ui.data_status }}</span>
+      {% endif %}
+    </div>
+    {% if prices.selected.latest %}
+      <p class="metric-label">{{ ui.current_price }}</p>
+      <p class="hero-price"><span>₱</span>{{ prices.selected.latest.price|floatformat:2 }}</p>
+      <p class="metric-unit">{{ ui.php_kg }} · {{ prices.selected.latest.count }} {{ ui.records }}</p>
+      <div class="price-range">
+        <span>{% if ui_language == 'tl' %}Saklaw{% else %}Observed range{% endif %}</span>
+        {% if prices.selected.latest.low and prices.selected.latest.high %}
+          <strong>₱{{ prices.selected.latest.low|floatformat:2 }}–₱{{ prices.selected.latest.high|floatformat:2 }}</strong>
+        {% else %}<strong>—</strong>{% endif %}
+      </div>
+      {% if prices.is_stale %}<span class="status-chip warning"><span aria-hidden="true">!</span> {{ ui.stale }}</span>{% endif %}
+    {% else %}
+      <p class="metric-label">{{ ui.current_price }}</p>
+      <p class="hero-price empty">—</p>
+      <p class="empty-note">{{ ui.no_data }}</p>
+    {% endif %}
+  </aside>
+
+  <div class="hero-index" aria-hidden="true">
+    <span>01</span><i></i><span>GABAY / FIELD NOTE</span>
+  </div>
+</section>
+
+<section class="status-ribbon shell" aria-label="{{ ui.data_status }}">
+  <div class="status-ribbon-label"><span class="pulse" aria-hidden="true"></span>{{ ui.data_status }}</div>
+  <div>
+    <small>{{ ui.source }}</small>
+    <strong>{% if prices.selected.source_count == 1 %}{{ prices.selected.source.name }}{% elif prices.selected.source_count > 1 %}{{ prices.selected.source_count }} {% if ui_language == 'tl' %}pinagmulan{% else %}contributing sources{% endif %}{% else %}—{% endif %}</strong>
+  </div>
+  <div>
+    <small>{{ ui.updated }}</small>
+    <strong>
+      {% if prices.selected.latest.latest_observed_on %}{{ prices.selected.latest.latest_observed_on|date:"M j, Y" }}{% elif prices.data_age_days is not None %}{{ prices.data_age_days }} days ago{% else %}—{% endif %}
+    </strong>
+  </div>
+  <div>
+    <small>{% if ui_language == 'tl' %}Uri ng datos{% else %}Dataset type{% endif %}</small>
+    <strong>
+      {% if prices.selected_scope == 'local' %}{{ ui.verified }}{% elif prices.selected_scope == 'demo' %}{{ ui.demo }}{% else %}{{ ui.reference }}{% endif %}
+    </strong>
+  </div>
+  <div>
+    <small>{% if ui_language == 'tl' %}Napiling serye{% else %}Published series{% endif %}</small>
+    <strong>{% if prices.selected.series_metadata.name %}{{ prices.selected.series_metadata.classification_label }} · {{ prices.selected.series_metadata.condition_label }}{% else %}—{% endif %}</strong>
+  </div>
+</section>
+
+<section class="section shell" id="weekly-guide" aria-labelledby="guide-title">
+  <header class="section-heading split-heading">
+    <div>
+      <p class="eyebrow dark"><span aria-hidden="true">✦</span> {% if ui_language == 'tl' %}Gabay ngayong linggo{% else %}This week’s field guide{% endif %}</p>
+      <h2 id="guide-title">{% if ui_language == 'tl' %}Isang resulta. <em>Nakikita ang dahilan.</em>{% else %}One result. <em>Reasons you can inspect.</em>{% endif %}</h2>
+    </div>
+    <p>{% if ui_language == 'tl' %}Hindi hinuhulaan ng GABAY ang tiyak na kita. Ipinapakita nito kung nagtutugma ang taya, takbo, at konteksto ng presyo.{% else %}GABAY does not predict certain profit. It shows whether the forecast, recent trend, and price context agree.{% endif %}</p>
+  </header>
+
+  <div class="guide-layout">
+    <article class="recommendation-card decision-{{ forecast.decision|lower }}">
+      <div class="recommendation-topline">
+        <span class="result-icon" aria-hidden="true">
+          {% if forecast.decision == 'SELL' %}↓{% elif forecast.decision == 'WAIT' %}↑{% else %}↔{% endif %}
+        </span>
+        <span>{{ ui.recommendation }}</span>
+        {% if forecast.target_week %}<time>{{ forecast.target_week|date:"M j, Y" }}</time>{% endif %}
+      </div>
+      <div class="recommendation-result">
+        {% if forecast.decision == 'SELL' %}{{ ui.sell }}{% elif forecast.decision == 'WAIT' %}{{ ui.wait }}{% else %}{{ ui.monitor }}{% endif %}
+      </div>
+      <p class="recommendation-summary">
+        {% if forecast.message %}{{ forecast.message }}{% elif ui_language == 'tl' %}Kulang o hindi nagtutugma ang ebidensiya para sa direksiyonal na resulta.{% else %}Evidence is insufficient or mixed, so GABAY is not issuing a directional result.{% endif %}
+      </p>
+      <div class="recommendation-meta">
+        <div><small>{{ ui.reliability }}</small><strong>{{ forecast.reliability }}</strong></div>
+        <div><small>{% if ui_language == 'tl' %}Edad ng datos{% else %}Data age{% endif %}</small><strong>{% if forecast.data_age_days is not None %}{{ forecast.data_age_days }} {% if ui_language == 'tl' %}araw{% else %}days{% endif %}{% else %}—{% endif %}</strong></div>
+      </div>
+    </article>
+
+    <div class="forecast-stack">
+      <article class="metric-card forecast-card">
+        <div class="metric-card-head"><span class="round-icon" aria-hidden="true">F</span><span>{{ ui.forecast }}</span></div>
+        {% if forecast.point_forecast %}
+          <p class="big-metric"><span>₱</span>{{ forecast.point_forecast|floatformat:2 }}<small>{{ ui.php_kg }}</small></p>
+          <div class="interval-bar" aria-label="{{ ui.uncertainty }}">
+            <i></i><b></b><i></i>
+          </div>
+          <p class="interval-label">
+            {{ ui.uncertainty }}:
+            {% if forecast.interval_lower and forecast.interval_upper %}<strong>₱{{ forecast.interval_lower|floatformat:2 }}–₱{{ forecast.interval_upper|floatformat:2 }}</strong>{% else %}<strong>—</strong>{% endif %}
+          </p>
+        {% else %}
+          <p class="big-metric empty">—</p>
+          <p class="empty-note">{% if ui_language == 'tl' %}Wala pang nailalathalang taya.{% else %}No published forecast is available yet.{% endif %}</p>
+        {% endif %}
+      </article>
+
+      <article class="reason-card">
+        <h3>{{ ui.why }}</h3>
+        {% if forecast.reasons %}
+          <ol class="reason-list">
+            {% for reason in forecast.reasons %}<li><span>{{ forloop.counter|stringformat:"02d" }}</span><p>{{ reason }}</p></li>{% endfor %}
+          </ol>
+        {% else %}
+          <p class="empty-note">{% if ui_language == 'tl' %}Lalabas dito ang mga dahilan kapag sapat na ang datos.{% else %}Reasons will appear here when enough evidence is available.{% endif %}</p>
+        {% endif %}
+        <p class="microcopy"><span aria-hidden="true">i</span>{{ ui.not_probability }}</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="shell history-preview">
+    <article class="chart-card">
+      <header class="card-heading">
+        <div>
+          <p class="eyebrow dark"><span aria-hidden="true">✦</span> {% if ui_language == 'tl' %}Takbo ng presyo{% else %}Price pulse{% endif %}</p>
+          <h2>{% if ui_language == 'tl' %}Ang huling 24 linggo, <em>sa isang tingin.</em>{% else %}The last 24 weeks, <em>at a glance.</em>{% endif %}</h2>
+        </div>
+        <a class="button button-outline" href="{% url 'portal:history' %}">{{ ui.history }} <span aria-hidden="true">→</span></a>
+      </header>
+      {% if chart.points %}
+        <div class="chart-wrap">
+          <div class="chart-scale" aria-hidden="true"><span>₱{{ chart.maximum|floatformat:2 }}</span><span>₱{{ chart.minimum|floatformat:2 }}</span></div>
+          <svg class="price-chart" viewBox="0 0 720 220" role="img" aria-labelledby="home-chart-title home-chart-desc" preserveAspectRatio="none">
+            <title id="home-chart-title">{% if ui_language == 'tl' %}Lingguhang presyo ng palay{% else %}Weekly palay price{% endif %}</title>
+            <desc id="home-chart-desc">{{ chart.count }} {% if ui_language == 'tl' %}lingguhang obserbasyon{% else %}weekly observations{% endif %}</desc>
+            <g class="grid-lines" aria-hidden="true"><line x1="20" y1="20" x2="700" y2="20"/><line x1="20" y1="110" x2="700" y2="110"/><line x1="20" y1="200" x2="700" y2="200"/></g>
+            <polyline class="chart-shadow" points="{{ chart.points }}" vector-effect="non-scaling-stroke"/>
+            <polyline class="chart-line" points="{{ chart.points }}" vector-effect="non-scaling-stroke"/>
+          </svg>
+        </div>
+      {% else %}
+        <div class="chart-empty"><span aria-hidden="true">∿</span><p>{{ ui.no_data }}</p></div>
+      {% endif %}
+      {% if prices.notice %}<p class="data-notice"><span aria-hidden="true">i</span>{{ prices.notice }}</p>{% endif %}
+    </article>
+
+    <aside class="reference-card">
+      <div class="reference-ornament" aria-hidden="true"><img src="{% static 'images/rice-sprig.svg' %}" width="150" height="220" alt=""></div>
+      <p class="eyebrow light"><span aria-hidden="true">✦</span> PSA Cotabato</p>
+      <h2>{% if ui_language == 'tl' %}Konteksto ng probinsya, <em>hindi lokal na kapalit.</em>{% else %}Provincial context, <em>never a local substitute.</em>{% endif %}</h2>
+      {% if prices.sections.reference.available and prices.sections.reference.latest %}
+        <p class="reference-value"><span>₱</span>{{ prices.sections.reference.latest.price|floatformat:2 }}<small>{{ ui.php_kg }}</small></p>
+        <p>{% if ui_language == 'tl' %}Buwanang sanggunian lamang; hindi hinahalo sa lokal na lingguhang serye.{% else %}Monthly reference only; it is not mixed into the local weekly series.{% endif %}</p>
+      {% else %}
+        <p class="reference-value empty">—</p>
+        <p>{% if ui_language == 'tl' %}Wala pang nakuhang opisyal na sanggunian.{% else %}No official reference has been retrieved yet.{% endif %}</p>
+      {% endif %}
+      <a class="text-link light-link" href="{% url 'portal:history' %}?scope=reference">{% if ui_language == 'tl' %}Tingnan ang hiwalay na serye{% else %}View the separate series{% endif %} <span aria-hidden="true">↗</span></a>
+    </aside>
+  </div>
+</section>
+
+<section class="section shell action-section">
+  <div class="action-copy">
+    <p class="eyebrow dark"><span aria-hidden="true">✦</span> {% if ui_language == 'tl' %}Mula presyo tungo sa pasya{% else %}From price to decision{% endif %}</p>
+    <h2>{% if ui_language == 'tl' %}May alok na? <em>Suriin ito nang hindi sine-save.</em>{% else %}Have an offer? <em>Check it without saving it.</em>{% endif %}</h2>
+    <p>{% if ui_language == 'tl' %}Ihambing ang presyong alok sa parehong nailathalang taya at mga panuntunan ng GABAY. Walang pangalan, numero, o halaga ng alok ang itinatago.{% else %}Compare a buyer’s offer with the same published forecast and GABAY rules. No name, number, or offer value is retained.{% endif %}</p>
+    <a class="button button-green" href="{% url 'portal:check-offer' %}">{{ ui.check_offer }} <span aria-hidden="true">→</span></a>
+  </div>
+  <ol class="field-steps">
+    <li><span>01</span><div><strong>{% if ui_language == 'tl' %}Beripikahin{% else %}Verify{% endif %}</strong><p>{% if ui_language == 'tl' %}Sinusuri muna ng hiwalay na kawani ang tala ng presyo.{% else %}A separate staff member checks each local price record.{% endif %}</p></div></li>
+    <li><span>02</span><div><strong>{% if ui_language == 'tl' %}Ihambing{% else %}Compare{% endif %}</strong><p>{% if ui_language == 'tl' %}Sinusubok ang ilang simpleng modelo laban sa parehong kasaysayan.{% else %}Several simple models are tested on the same past weeks.{% endif %}</p></div></li>
+    <li><span>03</span><div><strong>{% if ui_language == 'tl' %}Ipaliwanag{% else %}Explain{% endif %}</strong><p>{% if ui_language == 'tl' %}Naglalabas lamang ng direksiyon kapag nagtutugma ang ebidensiya.{% else %}A direction appears only when the evidence agrees.{% endif %}</p></div></li>
+  </ol>
+</section>
+{% endblock %}
