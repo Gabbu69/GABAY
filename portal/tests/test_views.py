@@ -90,6 +90,14 @@ class PublicPortalTests(TestCase):
         self.assertContains(response, "₱22.25")
         self.assertContains(response, "WAIT")
         self.assertContains(response, 'role="img"')
+        self.assertNotContains(response, "Demonstration data")
+
+    @patch("portal.views._fetch_forecast_context", return_value=forecast_fixture())
+    @patch("portal.views._fetch_price_context", return_value={**price_fixture(), "is_demo": True})
+    def test_home_labels_synthetic_data_even_outside_development(self, _prices, _forecast):
+        response = self.client.get(reverse("portal:home"))
+
+        self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Demonstration data")
 
     @patch("portal.views._fetch_price_context", return_value=price_fixture())
