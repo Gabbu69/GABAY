@@ -20,12 +20,12 @@
       {% csrf_token %}
       {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
       <div class="field-group {% if form.username.errors %}has-error{% endif %}">
-        <label for="{{ form.username.id_for_label }}">{% if ui_language == 'tl' %}Username{% else %}Username{% endif %}</label>
+        <label for="{{ form.username.id_for_label }}">Username</label>
         {{ form.username }}
         {% for error in form.username.errors %}<p class="field-error" role="alert">{{ error }}</p>{% endfor %}
       </div>
       <div class="field-group {% if form.password.errors %}has-error{% endif %}">
-        <label for="{{ form.password.id_for_label }}">{% if ui_language == 'tl' %}Password{% else %}Password{% endif %}</label>
+        <label for="{{ form.password.id_for_label }}">Password</label>
         {{ form.password }}
         {% for error in form.password.errors %}<p class="field-error" role="alert">{{ error }}</p>{% endfor %}
       </div>

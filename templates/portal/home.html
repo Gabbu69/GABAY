@@ -97,6 +97,18 @@
   </div>
 </section>
 
+{% if prices.is_stale %}
+<section class="shell" aria-label="{% if ui_language == 'tl' %}Babala sa lumang datos{% else %}Stale data warning{% endif %}">
+  <div class="boundary-note demo-boundary stale-note" role="alert">
+    <span class="round-icon" aria-hidden="true">!</span>
+    <div>
+      <strong>{% if ui_language == 'tl' %}Lumang datos—walang direksiyonal na payo.{% else %}Stale data—no directional advice.{% endif %}</strong>
+      <p>{% if ui_language == 'tl' %}Higit sa {{ prices.data_age_days }} araw na ang huling beripikadong obserbasyon, kaya MONITOR ang itinatagal na resulta hanggang sa may bagong beripikadong presyo.{% else %}The latest verified observation is {{ prices.data_age_days }} days old, so GABAY keeps the result at Monitor until a newly verified price arrives.{% endif %}</p>
+    </div>
+  </div>
+</section>
+{% endif %}
+
 <section class="section shell" id="weekly-guide" aria-labelledby="guide-title">
   <header class="section-heading split-heading">
     <div>
@@ -175,11 +187,25 @@
           <div class="chart-scale" aria-hidden="true"><span>₱{{ chart.maximum|floatformat:2 }}</span><span>₱{{ chart.minimum|floatformat:2 }}</span></div>
           <svg class="price-chart" viewBox="0 0 720 220" role="img" aria-labelledby="home-chart-title home-chart-desc" preserveAspectRatio="none">
             <title id="home-chart-title">{% if ui_language == 'tl' %}Lingguhang presyo ng palay{% else %}Weekly palay price{% endif %}</title>
-            <desc id="home-chart-desc">{{ chart.count }} {% if ui_language == 'tl' %}lingguhang obserbasyon{% else %}weekly observations{% endif %}</desc>
+            <desc id="home-chart-desc">{{ chart.count }} {% if ui_language == 'tl' %}lingguhang obserbasyon{% else %}weekly observations{% endif %}{% if chart.marker %}{% if ui_language == 'tl' %}, kasama ang taya para sa susunod na linggo{% else %}, with next-week forecast marker{% endif %}{% endif %}</desc>
             <g class="grid-lines" aria-hidden="true"><line x1="20" y1="20" x2="700" y2="20"/><line x1="20" y1="110" x2="700" y2="110"/><line x1="20" y1="200" x2="700" y2="200"/></g>
+            {% if chart.marker and chart.marker.band_y %}
+              <rect class="chart-band" x="{{ chart.marker.x }}" y="{{ chart.marker.band_y }}" width="6" height="{{ chart.marker.band_h }}" rx="3" aria-hidden="true"/>
+            {% endif %}
+            {% if chart.marker %}
+              <line class="chart-connector" x1="{{ chart.last.x }}" y1="{{ chart.last.y }}" x2="{{ chart.marker.x }}" y2="{{ chart.marker.y }}" aria-hidden="true"/>
+            {% endif %}
             <polyline class="chart-shadow" points="{{ chart.points }}" vector-effect="non-scaling-stroke"/>
             <polyline class="chart-line" points="{{ chart.points }}" vector-effect="non-scaling-stroke"/>
+            {% if chart.last %}<circle class="chart-dot" cx="{{ chart.last.x }}" cy="{{ chart.last.y }}" r="5.5" aria-hidden="true"/>{% endif %}
+            {% if chart.marker %}<circle class="chart-marker" cx="{{ chart.marker.x }}" cy="{{ chart.marker.y }}" r="5.5" aria-hidden="true"/>{% endif %}
           </svg>
+          {% if chart.ticks %}
+            <div class="chart-ticks" aria-hidden="true">
+              {% for tick in chart.ticks %}<span>{{ tick.label }}</span>{% endfor %}
+            </div>
+          {% endif %}
+          {% if chart.marker %}<p class="chart-legend"><i class="legend-dot legend-observed" aria-hidden="true"></i>{% if ui_language == 'tl' %}Naobserbahan{% else %}Observed{% endif %}<i class="legend-dot legend-forecast" aria-hidden="true"></i>{% if ui_language == 'tl' %}Taya susunod na linggo{% else %}Next-week forecast{% endif %}</p>{% endif %}
         </div>
       {% else %}
         <div class="chart-empty"><span aria-hidden="true">∿</span><p>{{ ui.no_data }}</p></div>

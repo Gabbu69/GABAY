@@ -1,11 +1,27 @@
 {% extends "base.html" %}
 
-{% block title %}Public series selection | GABAY{% endblock %}
+{% block title %}{% if ui_language == 'tl' %}Pagpili ng pampublikong serye{% else %}Public series selection{% endif %} | GABAY{% endblock %}
 
 {% block content %}
 <main class="page-shell management-page narrow-page">
-  <header class="page-header"><div><p class="eyebrow">Research control</p><h1>Choose a primary public series</h1><p>GABAY never switches palay classification, condition, or location automatically. Selecting a series replaces only the current selection in the same data scope.</p></div></header>
-  <section class="panel"><h2>Current selections</h2><ul class="record-list">{% for series in primary_series %}<li><strong>{{ series.get_scope_display }}</strong><span>{{ series.name }} · {{ series.get_classification_display }} · {{ series.get_condition_display }}{% if series.moisture_basis %} · {{ series.moisture_basis }}% moisture{% endif %}</span></li>{% empty %}<li>No explicit selections yet.</li>{% endfor %}</ul></section>
-  <form class="panel form-panel" method="post" novalidate>{% csrf_token %}{{ form.non_field_errors }}<div class="form-field">{{ form.series.label_tag }}{{ form.series }}<small>{{ form.series.help_text }}</small>{{ form.series.errors }}</div><div class="button-row"><button class="button button-primary" type="submit">Use this public series</button><a class="button button-ghost" href="{% url 'prices:dashboard' %}">Cancel</a></div></form>
+  <nav class="breadcrumbs" aria-label="Breadcrumb">
+    <a href="{% url 'portal:manage-dashboard' %}">{% if ui_language == 'tl' %}Pamamahala{% else %}Manage{% endif %}</a>
+    <span aria-hidden="true">›</span>
+    <a href="{% url 'prices:dashboard' %}">{% if ui_language == 'tl' %}Mga ebidensya ng presyo{% else %}Price evidence{% endif %}</a>
+    <span aria-hidden="true">›</span>
+    <span aria-current="page">{% if ui_language == 'tl' %}Pampublikong serye{% else %}Public series{% endif %}</span>
+  </nav>
+  <header class="page-header"><div><p class="eyebrow">{% if ui_language == 'tl' %}Kontrol ng pananaliksik{% else %}Research control{% endif %}</p><h1>{% if ui_language == 'tl' %}Pumili ng pangunahing pampublikong serye{% else %}Choose a primary public series{% endif %}</h1><p>{% if ui_language == 'tl' %}Hindi kailanman nagpapalit ang GABAY ng uring palay, kalagayan, o lokasyon nang awtomatiko. Ang pagpili ay pumapalit lamang sa kasalukuyang pinili sa parehong saklaw ng datos.{% else %}GABAY never switches palay classification, condition, or location automatically. Selecting a series replaces only the current selection in the same data scope.{% endif %}</p></div></header>
+  <section class="panel"><h2>{% if ui_language == 'tl' %}Kasalukuyang mga pinili{% else %}Current selections{% endif %}</h2><ul class="record-list">{% for series in primary_series %}<li><strong>{{ series.get_scope_display }}</strong><span>{{ series.name }} · {{ series.get_classification_display }} · {{ series.get_condition_display }}{% if series.moisture_basis %} · {{ series.moisture_basis }}% {% if ui_language == 'tl' %}halumigmig{% else %}moisture{% endif %}{% endif %}</span></li>{% empty %}<li>{% if ui_language == 'tl' %}Wala pang malinaw na pinili.{% else %}No explicit selections yet.{% endif %}</li>{% endfor %}</ul></section>
+  <form class="panel form-panel" method="post" novalidate>{% csrf_token %}
+    {% if form.non_field_errors %}<div class="alert alert-error" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="form-field {% if form.series.errors %}has-error{% endif %}">
+      <label for="{{ form.series.id_for_label }}">{{ form.series.label }}</label>
+      {{ form.series }}
+      {% if form.series.help_text %}<small>{{ form.series.help_text }}</small>{% endif %}
+      {% for error in form.series.errors %}<p class="field-error" role="alert">{{ error }}</p>{% endfor %}
+    </div>
+    <div class="button-row"><button class="button button-primary" type="submit">{% if ui_language == 'tl' %}Gamitin ang pampublikong seryeng ito{% else %}Use this public series{% endif %}</button><a class="button button-ghost" href="{% url 'prices:dashboard' %}">{% if ui_language == 'tl' %}Kanselahin{% else %}Cancel{% endif %}</a></div>
+  </form>
 </main>
 {% endblock %}

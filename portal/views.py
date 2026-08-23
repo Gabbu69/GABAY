@@ -292,25 +292,76 @@ def _forecast_context(raw, request: HttpRequest, *, current_price=None) -> dict:
     }
 
 
-def _chart_context(history: list[dict]) -> dict:
-    values = [float(item["price"]) for item in history if item["price"] is not None]
+def _chart_context(history: list[dict], *, forecast: dict | None = None) -> dict:
+    clean = [item for item in history if item["price"] is not None]
+    values = [float(item["price"]) for item in clean]
     if not values:
-        return {"points": "", "minimum": None, "maximum": None, "count": 0}
-    minimum = min(values)
-    maximum = max(values)
+        return {
+            "points": "",
+            "minimum": None,
+            "maximum": None,
+            "count": 0,
+            "last": None,
+            "marker": None,
+            "ticks": [],
+        }
+    point = _decimal(_read(forecast, "point_forecast")) if forecast else None
+    lower = _decimal(_read(forecast, "interval_lower")) if forecast else None
+    upper = _decimal(_read(forecast, "interval_upper")) if forecast else None
+
+    plotted = values[:]
+    if point is not None:
+        plotted.append(float(point))
+    bounds = plotted[:]
+    if lower is not None:
+        bounds.append(float(lower))
+    if upper is not None:
+        bounds.append(float(upper))
+    minimum = min(bounds)
+    maximum = max(bounds)
     spread = maximum - minimum or 1
     width, height, padding = 720, 220, 20
-    denominator = max(len(values) - 1, 1)
-    points = []
-    for index, value in enumerate(values):
+    denominator = max(len(plotted) - 1, 1)
+
+    def project(value: float, index: int) -> tuple[str, str]:
         x = padding + ((width - padding * 2) * index / denominator)
         y = height - padding - ((height - padding * 2) * (value - minimum) / spread)
-        points.append(f"{x:.1f},{y:.1f}")
+        return f"{x:.1f}", f"{y:.1f}"
+
+    projected = [project(value, index) for index, value in enumerate(plotted)]
+    history_points = projected[:-1] if point is not None else projected
+    line_points = " ".join(f"{x},{y}" for x, y in history_points)
+
+    last_x, last_y = projected[len(values) - 1]
+    last = {"x": last_x, "y": last_y}
+
+    marker = None
+    if point is not None:
+        marker_x, marker_y = projected[-1]
+        marker = {"x": marker_x, "y": marker_y, "band_y": "", "band_h": 0}
+        if lower is not None and upper is not None:
+            low_y = float(project(float(lower), len(plotted) - 1)[1])
+            high_y = float(project(float(upper), len(plotted) - 1)[1])
+            marker["band_y"] = f"{min(low_y, high_y):.1f}"
+            marker["band_h"] = f"{abs(high_y - low_y):.1f}"
+
+    step = max(len(clean) // 5, 1)
+    ticks = []
+    for start in range(0, len(clean), step)[:6]:
+        item = clean[start]
+        x, _ = project(float(item["price"]), start)
+        week_start = _read(item, "week_start")
+        if week_start is not None:
+            ticks.append({"x": x, "label": f"{week_start.strftime('%b')} {week_start.day}"})
+
     return {
-        "points": " ".join(points),
+        "points": line_points,
         "minimum": Decimal(str(minimum)),
         "maximum": Decimal(str(maximum)),
         "count": len(values),
+        "last": last,
+        "marker": marker,
+        "ticks": ticks,
     }
 
 
@@ -326,7 +377,7 @@ def home(request: HttpRequest) -> HttpResponse:
         {
             "prices": prices,
             "forecast": forecast,
-            "chart": _chart_context(prices["selected"]["history"][-24:]),
+            "chart": _chart_context(prices["selected"]["history"][-24:], forecast=forecast),
             "page_is_demo": prices["is_demo"] or forecast["is_demo"],
         },
     )

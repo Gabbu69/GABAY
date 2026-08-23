@@ -1,15 +1,32 @@
 {% extends "base.html" %}
 
-{% block title %}Stage CSV | GABAY{% endblock %}
+{% block title %}{% if ui_language == 'tl' %}Paghahanda ng CSV{% else %}Stage CSV{% endif %} | GABAY{% endblock %}
 
 {% block content %}
 <main class="page-shell management-page narrow-page">
-  <header class="page-header"><div><p class="eyebrow">Maker step</p><h1>Stage a price CSV</h1><p>Choose one compatible series and source. No uploaded row is published automatically.</p></div></header>
-  <section class="panel guidance-card"><h2>Before uploading</h2><ul><li>Use UTF-8 CSV with ISO dates (<code>YYYY-MM-DD</code>).</li><li>Provide explicit container weight for bag, sack, or cavan prices.</li><li>Keep municipality data separate from PSA provincial references.</li></ul><a href="{% url 'prices:csv-template' %}">Download the exact column template</a></section>
+  <nav class="breadcrumbs" aria-label="Breadcrumb">
+    <a href="{% url 'portal:manage-dashboard' %}">{% if ui_language == 'tl' %}Pamamahala{% else %}Manage{% endif %}</a>
+    <span aria-hidden="true">›</span>
+    <a href="{% url 'prices:dashboard' %}">{% if ui_language == 'tl' %}Mga ebidensya ng presyo{% else %}Price evidence{% endif %}</a>
+    <span aria-hidden="true">›</span>
+    <a href="{% url 'prices:import-list' %}">{% if ui_language == 'tl' %}Mga import{% else %}Imports{% endif %}</a>
+    <span aria-hidden="true">›</span>
+    <span aria-current="page">{% if ui_language == 'tl' %}CSV{% else %}Stage CSV{% endif %}</span>
+  </nav>
+  <header class="page-header"><div><p class="eyebrow">{% if ui_language == 'tl' %}Hakbang ng maker{% else %}Maker step{% endif %}</p><h1>{% if ui_language == 'tl' %}Ihanda ang price CSV{% else %}Stage a price CSV{% endif %}</h1><p>{% if ui_language == 'tl' %}Pumili ng iisang katugmang serye at pinagmulan. Walang awtomatikong nailalathalang hanay.{% else %}Choose one compatible series and source. No uploaded row is published automatically.{% endif %}</p></div></header>
+  <section class="panel guidance-card">
+    <h2>{% if ui_language == 'tl' %}Bago mag-upload{% else %}Before uploading{% endif %}</h2>
+    <ul>
+      <li>{% if ui_language == 'tl' %}Gumamit ng UTF-8 CSV na may ISO na petsa (<code>YYYY-MM-DD</code>).{% else %}Use UTF-8 CSV with ISO dates (<code>YYYY-MM-DD</code>).{% endif %}</li>
+      <li>{% if ui_language == 'tl' %}Ilagay ang tiyak na timbang ng lalagyan para sa supot, sako, o kaban.{% else %}Provide explicit container weight for bag, sack, or cavan prices.{% endif %}</li>
+      <li>{% if ui_language == 'tl' %}Panatilihing hiwalay ang datos ng bayan mula sa PSA na sangguniang panlalawigan.{% else %}Keep municipality data separate from PSA provincial references.{% endif %}</li>
+    </ul>
+    <a href="{% url 'prices:csv-template' %}">{% if ui_language == 'tl' %}I-download ang eksaktong template ng mga haligi{% else %}Download the exact column template{% endif %}</a>
+  </section>
   <form class="panel form-panel" method="post" enctype="multipart/form-data" novalidate>{% csrf_token %}
-    {% if form.non_field_errors %}<div class="alert alert-error">{{ form.non_field_errors }}</div>{% endif %}
-    {% for field in form %}<div class="form-field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<p class="field-error">{{ error }}</p>{% endfor %}</div>{% endfor %}
-    <div class="button-row"><button class="button button-primary" type="submit">Validate and stage</button><a class="button button-ghost" href="{% url 'prices:import-list' %}">Cancel</a></div>
+    {% if form.non_field_errors %}<div class="alert alert-error" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+    {% for field in form %}<div class="form-field {% if field.errors %}has-error{% endif %}"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<p class="field-error" role="alert">{{ error }}</p>{% endfor %}</div>{% endfor %}
+    <div class="button-row"><button class="button button-primary" type="submit">{% if ui_language == 'tl' %}Beripikahin at ihanda{% else %}Validate and stage{% endif %}</button><a class="button button-ghost" href="{% url 'prices:import-list' %}">{% if ui_language == 'tl' %}Kanselahin{% else %}Cancel{% endif %}</a></div>
   </form>
 </main>
 {% endblock %}

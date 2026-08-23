@@ -87,9 +87,11 @@ class PublicPortalTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Palay prices")
-        self.assertContains(response, "₱22.25")
+        self.assertContains(response, "<span>₱</span>22.25")
         self.assertContains(response, "WAIT")
         self.assertContains(response, 'role="img"')
+        self.assertContains(response, "chart-marker")
+        self.assertContains(response, "chart-ticks")
         self.assertNotContains(response, "Demonstration data")
 
     @patch("portal.views._fetch_forecast_context", return_value=forecast_fixture())

@@ -1,30 +1,39 @@
 {% extends "base.html" %}
 
-{% block title %}{% if mode == "revision" %}Revise evidence{% else %}Add evidence{% endif %} | GABAY{% endblock %}
+{% block title %}{% if mode == "revision" %}{% if ui_language == 'tl' %}Pagwawasto ng ebidensya{% else %}Revise evidence{% endif %}{% else %}{% if ui_language == 'tl' %}Magdagdag ng ebidensya{% else %}Add evidence{% endif %}{% endif %} | GABAY{% endblock %}
 
 {% block content %}
 <main class="page-shell management-page narrow-page">
+  <nav class="breadcrumbs" aria-label="Breadcrumb">
+    <a href="{% url 'portal:manage-dashboard' %}">{% if ui_language == 'tl' %}Pamamahala{% else %}Manage{% endif %}</a>
+    <span aria-hidden="true">›</span>
+    <a href="{% url 'prices:dashboard' %}">{% if ui_language == 'tl' %}Mga ebidensya ng presyo{% else %}Price evidence{% endif %}</a>
+    <span aria-hidden="true">›</span>
+    <a href="{% url 'prices:observation-list' %}">{% if ui_language == 'tl' %}Mga obserbasyon{% else %}Observations{% endif %}</a>
+    <span aria-hidden="true">›</span>
+    <span aria-current="page">{% if ui_language == 'tl' %}Bagong tala{% else %}New record{% endif %}</span>
+  </nav>
   <header class="page-header">
     <div>
-      <p class="eyebrow">Maker step</p>
-      <h1>{% if mode == "revision" %}Submit a correction{% else %}Add price evidence{% endif %}</h1>
-      <p>{% if mode == "revision" %}The current verified value remains public until a different account approves this revision.{% else %}A different verifier must approve this record before it can appear publicly.{% endif %}</p>
+      <p class="eyebrow">{% if ui_language == 'tl' %}Hakbang ng maker{% else %}Maker step{% endif %}</p>
+      <h1>{% if mode == "revision" %}{% if ui_language == 'tl' %}Magsumite ng pagwawasto{% else %}Submit a correction{% endif %}{% else %}{% if ui_language == 'tl' %}Magdagdag ng ebidensya ng presyo{% else %}Add price evidence{% endif %}{% endif %}</h1>
+      <p>{% if mode == "revision" %}{% if ui_language == 'tl' %}Mananatiling pampubliko ang kasalukuyang beripikadong halaga hanggang sa aprubahan ng ibang account ang pagwawastong ito.{% else %}The current verified value remains public until a different account approves this revision.{% endif %}{% else %}{% if ui_language == 'tl' %}Kailangang aprubahan ng ibang verifier ang tala bago ito lumabas nang pampubliko.{% else %}A different verifier must approve this record before it can appear publicly.{% endif %}{% endif %}</p>
     </div>
   </header>
   <form class="panel form-panel" method="post" novalidate>
     {% csrf_token %}
-    {% if form.non_field_errors %}<div class="alert alert-error">{{ form.non_field_errors }}</div>{% endif %}
+    {% if form.non_field_errors %}<div class="alert alert-error" role="alert">{{ form.non_field_errors }}</div>{% endif %}
     <div class="form-grid">
       {% for field in form %}
-        <div class="form-field {% if field.name == 'notes' or field.name == 'reason' %}form-field-wide{% endif %}">
+        <div class="form-field {% if field.name == 'notes' or field.name == 'reason' %}form-field-wide{% endif %} {% if field.errors %}has-error{% endif %}">
           <label for="{{ field.id_for_label }}">{{ field.label }}</label>
           {{ field }}
           {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
-          {% for error in field.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+          {% for error in field.errors %}<p class="field-error" role="alert">{{ error }}</p>{% endfor %}
         </div>
       {% endfor %}
     </div>
-    <div class="button-row"><button class="button button-primary" type="submit">Submit for verification</button><a class="button button-ghost" href="{% url 'prices:observation-list' %}">Cancel</a></div>
+    <div class="button-row"><button class="button button-primary" type="submit">{% if ui_language == 'tl' %}Isumite para sa beripikasyon{% else %}Submit for verification{% endif %}</button><a class="button button-ghost" href="{% url 'prices:observation-list' %}">{% if ui_language == 'tl' %}Kanselahin{% else %}Cancel{% endif %}</a></div>
   </form>
 </main>
 {% endblock %}

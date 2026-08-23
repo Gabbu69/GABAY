@@ -1,13 +1,20 @@
 {% extends "base.html" %}
 
-{% block title %}Price imports | GABAY{% endblock %}
+{% block title %}{% if ui_language == 'tl' %}Mga import ng presyo{% else %}Price imports{% endif %} | GABAY{% endblock %}
 
 {% block content %}
 <main class="page-shell management-page">
-  <header class="page-header"><div><p class="eyebrow">Controlled intake</p><h1>CSV import batches</h1><p>Uploads are staged and checked row by row before publication.</p></div>{% if can_encode %}<a class="button button-primary" href="{% url 'prices:import-create' %}">Stage CSV</a>{% endif %}</header>
-  <section class="panel"><div class="table-wrap"><table>
-    <thead><tr><th>Created</th><th>File</th><th>Series</th><th>Uploader</th><th>Rows</th><th>Status</th></tr></thead>
-    <tbody>{% for batch in batches %}<tr><td><a href="{% url 'prices:import-detail' batch.public_id %}">{{ batch.created_at }}</a></td><td>{{ batch.original_filename|default:batch.get_kind_display }}</td><td>{{ batch.series.name }}</td><td>{{ batch.uploaded_by|default:"System" }}</td><td>{{ batch.row_count }}</td><td><span class="status-chip">{{ batch.get_status_display }}</span></td></tr>{% empty %}<tr><td colspan="6">No imports yet.</td></tr>{% endfor %}</tbody>
+  <nav class="breadcrumbs" aria-label="Breadcrumb">
+    <a href="{% url 'portal:manage-dashboard' %}">{% if ui_language == 'tl' %}Pamamahala{% else %}Manage{% endif %}</a>
+    <span aria-hidden="true">›</span>
+    <a href="{% url 'prices:dashboard' %}">{% if ui_language == 'tl' %}Mga ebidensya ng presyo{% else %}Price evidence{% endif %}</a>
+    <span aria-hidden="true">›</span>
+    <span aria-current="page">{% if ui_language == 'tl' %}Mga import{% else %}Imports{% endif %}</span>
+  </nav>
+  <header class="page-header"><div><p class="eyebrow">{% if ui_language == 'tl' %}Kinokontrolang pagpasok{% else %}Controlled intake{% endif %}</p><h1>{% if ui_language == 'tl' %}Mga CSV import batch{% else %}CSV import batches{% endif %}</h1><p>{% if ui_language == 'tl' %}Ang mga upload ay inihahanda at sinusuri nang hanay-hanay bago ilathala.{% else %}Uploads are staged and checked row by row before publication.{% endif %}</p></div>{% if can_encode %}<a class="button button-primary" href="{% url 'prices:import-create' %}">CSV</a>{% endif %}</header>
+  <section class="panel"><div class="table-wrap" tabindex="0" role="region" aria-label="{% if ui_language == 'tl' %}Mga import batch{% else %}Import batches{% endif %}"><table>
+    <thead><tr><th scope="col">{% if ui_language == 'tl' %}Nilikha{% else %}Created{% endif %}</th><th scope="col">{% if ui_language == 'tl' %}Talaksan{% else %}File{% endif %}</th><th scope="col">{% if ui_language == 'tl' %}Serye{% else %}Series{% endif %}</th><th scope="col">{% if ui_language == 'tl' %}Nag-upload{% else %}Uploader{% endif %}</th><th scope="col">{% if ui_language == 'tl' %}Mga hanay{% else %}Rows{% endif %}</th><th scope="col">{% if ui_language == 'tl' %}Katayuan{% else %}Status{% endif %}</th></tr></thead>
+    <tbody>{% for batch in batches %}<tr><td><a href="{% url 'prices:import-detail' batch.public_id %}">{{ batch.created_at|date:"M j, Y H:i" }}</a></td><td>{{ batch.original_filename|default:batch.get_kind_display }}</td><td>{{ batch.series.name }}</td><td>{{ batch.uploaded_by|default:"System" }}</td><td>{{ batch.row_count }}</td><td><span class="status-chip status-{{ batch.status }}">{{ batch.get_status_display }}</span></td></tr>{% empty %}<tr><td colspan="6">{% if ui_language == 'tl' %}Wala pang import.{% else %}No imports yet.{% endif %}</td></tr>{% endfor %}</tbody>
   </table></div></section>
 </main>
 {% endblock %}

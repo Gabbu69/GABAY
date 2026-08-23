@@ -79,7 +79,13 @@
           <g class="grid-lines" aria-hidden="true"><line x1="20" y1="20" x2="700" y2="20"/><line x1="20" y1="65" x2="700" y2="65"/><line x1="20" y1="110" x2="700" y2="110"/><line x1="20" y1="155" x2="700" y2="155"/><line x1="20" y1="200" x2="700" y2="200"/></g>
           <polyline class="chart-shadow" points="{{ chart.points }}" vector-effect="non-scaling-stroke"/>
           <polyline class="chart-line" points="{{ chart.points }}" vector-effect="non-scaling-stroke"/>
+          {% if chart.last %}<circle class="chart-dot" cx="{{ chart.last.x }}" cy="{{ chart.last.y }}" r="5.5" aria-hidden="true"/>{% endif %}
         </svg>
+        {% if chart.ticks %}
+          <div class="chart-ticks" aria-hidden="true">
+            {% for tick in chart.ticks %}<span>{{ tick.label }}</span>{% endfor %}
+          </div>
+        {% endif %}
       </div>
     {% else %}
       <div class="chart-empty tall"><span aria-hidden="true">∿</span><strong>{{ ui.no_data }}</strong><p>{% if ui_language == 'tl' %}Pumili ng ibang uri ng datos o bumalik kapag may beripikadong tala na.{% else %}Choose another dataset type or return when verified records are available.{% endif %}</p></div>

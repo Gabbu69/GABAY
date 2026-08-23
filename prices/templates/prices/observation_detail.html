@@ -1,47 +1,74 @@
 {% extends "base.html" %}
 
-{% block title %}Evidence {{ observation.public_id }} | GABAY{% endblock %}
+{% block title %}{% if ui_language == 'tl' %}Ebidensya{% else %}Evidence{% endif %} {{ observation.public_id }} | GABAY{% endblock %}
 
 {% block content %}
 <main class="page-shell management-page">
+  <nav class="breadcrumbs" aria-label="Breadcrumb">
+    <a href="{% url 'portal:manage-dashboard' %}">{% if ui_language == 'tl' %}Pamamahala{% else %}Manage{% endif %}</a>
+    <span aria-hidden="true">›</span>
+    <a href="{% url 'prices:dashboard' %}">{% if ui_language == 'tl' %}Mga ebidensya ng presyo{% else %}Price evidence{% endif %}</a>
+    <span aria-hidden="true">›</span>
+    <a href="{% url 'prices:observation-list' %}">{% if ui_language == 'tl' %}Mga obserbasyon{% else %}Observations{% endif %}</a>
+    <span aria-hidden="true">›</span>
+    <span aria-current="page">{{ observation.observed_on|date:"M j, Y" }}</span>
+  </nav>
   <header class="page-header">
-    <div><p class="eyebrow">{{ observation.series.get_scope_display }}</p><h1>PHP {{ observation.normalized_price|floatformat:2 }} per kg</h1><p>{{ observation.series.name }} · observed {{ observation.observed_on }}</p></div>
+    <div><p class="eyebrow">{{ observation.series.get_scope_display }}</p><h1>PHP {{ observation.normalized_price|floatformat:2 }} / kg</h1><p>{{ observation.series.name }} · {% if ui_language == 'tl' %}naobserbahan{% else %}observed{% endif %} {{ observation.observed_on|date:"M j, Y" }}</p></div>
     <span class="status-chip status-{{ observation.workflow_status }}">{{ observation.get_workflow_status_display }}</span>
   </header>
 
-  {% if observation.is_demo %}<div class="alert alert-warning"><strong>Demonstration data—not verified market information.</strong></div>{% endif %}
-  {% if observation.is_outlier %}<div class="alert alert-warning">This value was flagged as an outlier and requires explicit evidence checking.</div>{% endif %}
-  {% if observation.is_conflict %}<div class="alert alert-warning">This value conflicts with evidence using the same source, date, and reference. It remains quarantined until explicitly reconciled.</div>{% endif %}
+  {% if observation.is_demo %}<div class="alert alert-warning" role="alert"><strong>Demonstration data—not verified market information.</strong></div>{% endif %}
+  {% if observation.is_outlier %}<div class="alert alert-warning" role="alert"><strong>{% if ui_language == 'tl' %}Outlier:{% else %}Outlier flag:{% endif %}</strong> {% if ui_language == 'tl' %}Naituring itong outlier at kinakailangang tiyak na pagsusuri ng ebidensya.{% else %}this value requires explicit evidence checking against the original source.{% endif %}</div>{% endif %}
+  {% if observation.is_conflict %}<div class="alert alert-warning" role="alert"><strong>{% if ui_language == 'tl' %}Salungat na ebidensya:{% else %}Conflict flag:{% endif %}</strong> {% if ui_language == 'tl' %}May tumutugmang pinagmulan, petsa, at sanggunian. Nanatili itong nakakulong hanggang sa malinaw na pagsasaayos.{% else %}another record shares the same source, date, and reference. It remains quarantined until explicitly reconciled.{% endif %}</div>{% endif %}
 
   <section class="content-grid">
     <article class="panel definition-panel">
-      <h2>Evidence details</h2>
+      <h2>{% if ui_language == 'tl' %}Detalye ng ebidensya{% else %}Evidence details{% endif %}</h2>
       <dl>
-        <div><dt>Original value</dt><dd>{{ observation.original_price }} per {{ observation.original_unit }}{% if observation.container_weight_kg %} ({{ observation.container_weight_kg }} kg){% endif %}</dd></div>
-        <div><dt>Source</dt><dd>{{ observation.source.name }}</dd></div>
-        <div><dt>Classification</dt><dd>{{ observation.series.get_classification_display }}</dd></div>
-        <div><dt>Condition</dt><dd>{{ observation.series.get_condition_display }}{% if observation.series.moisture_basis %} · {{ observation.series.moisture_basis }}% moisture basis{% endif %}</dd></div>
-        <div><dt>Location basis</dt><dd>{{ observation.series.location_name }} · {{ observation.series.get_location_level_display }}</dd></div>
-        <div><dt>Source reference</dt><dd>{{ observation.source_reference }}</dd></div>
-        <div><dt>Collection method</dt><dd>{{ observation.collection_method|default:"Not supplied" }}</dd></div>
-        <div><dt>Entered by</dt><dd>{{ observation.created_by|default:"System importer" }}</dd></div>
-        <div><dt>Revision</dt><dd>v{{ observation.revision }}{% if observation.supersedes %}, correcting {{ observation.supersedes.public_id }}{% endif %}</dd></div>
+        <div><dt>{% if ui_language == 'tl' %}Orihinal na halaga{% else %}Original value{% endif %}</dt><dd>{{ observation.original_price }} per {{ observation.original_unit }}{% if observation.container_weight_kg %} ({{ observation.container_weight_kg }} kg){% endif %}</dd></div>
+        <div><dt>{% if ui_language == 'tl' %}Pinagmulan{% else %}Source{% endif %}</dt><dd>{{ observation.source.name }}</dd></div>
+        <div><dt>{% if ui_language == 'tl' %}Uring palay{% else %}Classification{% endif %}</dt><dd>{{ observation.series.get_classification_display }}</dd></div>
+        <div><dt>{% if ui_language == 'tl' %}Kalagayan{% else %}Condition{% endif %}</dt><dd>{{ observation.series.get_condition_display }}{% if observation.series.moisture_basis %} · {{ observation.series.moisture_basis }}% {% if ui_language == 'tl' %}batayan ng halumigmig{% else %}moisture basis{% endif %}{% endif %}</dd></div>
+        <div><dt>{% if ui_language == 'tl' %}Batayang lokasyon{% else %}Location basis{% endif %}</dt><dd>{{ observation.series.location_name }} · {{ observation.series.get_location_level_display }}</dd></div>
+        <div><dt>{% if ui_language == 'tl' %}Sanggunian{% else %}Source reference{% endif %}</dt><dd>{{ observation.source_reference|default:"—" }}</dd></div>
+        <div><dt>{% if ui_language == 'tl' %}Paraan ng pagkolekta{% else %}Collection method{% endif %}</dt><dd>{{ observation.collection_method|default:"—" }}</dd></div>
+        <div><dt>{% if ui_language == 'tl' %}Ini-encode ni{% else %}Entered by{% endif %}</dt><dd>{{ observation.created_by|default:"System importer" }}</dd></div>
+        <div><dt>{% if ui_language == 'tl' %}Bersyon{% else %}Revision{% endif %}</dt><dd>v{{ observation.revision }}{% if observation.supersedes %}, {% if ui_language == 'tl' %}itinatama ang{% else %}correcting{% endif %} {{ observation.supersedes.public_id }}{% endif %}</dd></div>
       </dl>
-      {% if observation.notes %}<h3>Notes</h3><p>{{ observation.notes }}</p>{% endif %}
-      {% if can_encode and observation.workflow_status == "verified" and observation.is_current %}<a class="button button-secondary" href="{% url 'prices:observation-revise' observation.public_id %}">Create correction</a>{% endif %}
+      {% if observation.notes %}<h3>{% if ui_language == 'tl' %}Mga tala{% else %}Notes{% endif %}</h3><p>{{ observation.notes }}</p>{% endif %}
+      {% if can_encode and observation.workflow_status == "verified" and observation.is_current %}<a class="button button-secondary" href="{% url 'prices:observation-revise' observation.public_id %}">{% if ui_language == 'tl' %}Gumawa ng pagwawasto{% else %}Create correction{% endif %}</a>{% endif %}
     </article>
 
     <aside class="panel">
-      <h2>Verification trail</h2>
+      <h2>{% if ui_language == 'tl' %}Bakas ng beripikasyon{% else %}Verification trail{% endif %}</h2>
       <ol class="timeline">
-        {% for event in events %}<li><strong>{{ event.get_action_display }}</strong><span>{{ event.created_at }} · {{ event.actor|default:"System" }}</span>{% if event.reason %}<p>{{ event.reason }}</p>{% endif %}</li>{% empty %}<li>No events recorded.</li>{% endfor %}
+        {% for event in events %}<li><strong>{{ event.get_action_display }}</strong><time datetime="{{ event.created_at|date:'Y-m-d H:i' }}">{{ event.created_at|date:"M j, Y H:i" }} · {{ event.actor|default:"System" }}</time>{% if event.reason %}<p>{{ event.reason }}</p>{% endif %}</li>{% empty %}<li>{% if ui_language == 'tl' %}Walang naitalang pangyayari.{% else %}No events recorded.{% endif %}</li>{% endfor %}
       </ol>
       {% if can_verify and observation.workflow_status == "pending" %}
         {% if is_own %}
-          <div class="alert alert-warning">Maker-checker control: you cannot decide your own entry.</div>
+          <div class="alert alert-warning" role="alert"><strong>{% if ui_language == 'tl' %}Maker-checker na kontrol:{% else %}Maker-checker control:{% endif %}</strong> {% if ui_language == 'tl' %}Hindi maaaring magdesisyon sa sariling tala.{% else %}you cannot decide your own entry.{% endif %}</div>
         {% else %}
-          <form method="post" action="{% url 'prices:observation-approve' observation.public_id %}">{% csrf_token %}{{ verification_form.reason.label_tag }}{{ verification_form.reason }}{% if observation.is_outlier %}<label>{{ verification_form.accept_outlier }} Evidence outlier checked against the original source</label>{% endif %}{% if observation.is_conflict %}<label>{{ verification_form.accept_conflict }} Conflicting evidence reconciled</label>{% endif %}<button class="button button-primary" type="submit">Approve evidence</button></form>
-          <form method="post" action="{% url 'prices:observation-reject' observation.public_id %}">{% csrf_token %}{{ rejection_form.reason.label_tag }}{{ rejection_form.reason }}<button class="button button-danger" type="submit">Reject with reason</button></form>
+          <form method="post" action="{% url 'prices:observation-approve' observation.public_id %}" class="stack-form">
+            {% csrf_token %}
+            <div class="form-field">
+              <label for="{{ verification_form.reason.id_for_label }}">{{ verification_form.reason.label }}</label>
+              {{ verification_form.reason }}
+              {% for error in verification_form.reason.errors %}<p class="field-error" role="alert">{{ error }}</p>{% endfor %}
+              {% if observation.is_outlier %}<label>{{ verification_form.accept_outlier }} {% if ui_language == 'tl' %}Nasuri ang outlier laban sa orihinal na pinagmulan{% else %}Evidence outlier checked against the original source{% endif %}</label>{% endif %}
+              {% if observation.is_conflict %}<label>{{ verification_form.accept_conflict }} {% if ui_language == 'tl' %}Naayos ang salungat na ebidensya{% else %}Conflicting evidence reconciled{% endif %}</label>{% endif %}
+            </div>
+            <button class="button button-primary" type="submit">{% if ui_language == 'tl' %}Aprubahan ang ebidensya{% else %}Approve evidence{% endif %}</button>
+          </form>
+          <form method="post" action="{% url 'prices:observation-reject' observation.public_id %}" class="stack-form verification-form">
+            {% csrf_token %}
+            <div class="form-field {% if rejection_form.reason.errors %}has-error{% endif %}">
+              <label for="{{ rejection_form.reason.id_for_label }}">{{ rejection_form.reason.label }}</label>
+              {{ rejection_form.reason }}
+              {% for error in rejection_form.reason.errors %}<p class="field-error" role="alert">{{ error }}</p>{% endfor %}
+            </div>
+            <button class="button button-danger" type="submit">{% if ui_language == 'tl' %}Tanggihan na may dahilan{% else %}Reject with reason{% endif %}</button>
+          </form>
         {% endif %}
       {% endif %}
     </aside>

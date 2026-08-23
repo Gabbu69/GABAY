@@ -1,32 +1,39 @@
 {% extends "base.html" %}
 
-{% block title %}Observations | GABAY{% endblock %}
+{% block title %}{% if ui_language == 'tl' %}Mga obserbasyon{% else %}Observations{% endif %} | GABAY{% endblock %}
 
 {% block content %}
 <main class="page-shell management-page">
+  <nav class="breadcrumbs" aria-label="Breadcrumb">
+    <a href="{% url 'portal:manage-dashboard' %}">{% if ui_language == 'tl' %}Pamamahala{% else %}Manage{% endif %}</a>
+    <span aria-hidden="true">›</span>
+    <a href="{% url 'prices:dashboard' %}">{% if ui_language == 'tl' %}Mga ebidensya ng presyo{% else %}Price evidence{% endif %}</a>
+    <span aria-hidden="true">›</span>
+    <span aria-current="page">{% if ui_language == 'tl' %}Mga obserbasyon{% else %}Observations{% endif %}</span>
+  </nav>
   <header class="page-header">
-    <div><p class="eyebrow">Evidence register</p><h1>Price observations</h1><p>Every correction is a new revision; original evidence stays in the audit history.</p></div>
-    {% if can_encode %}<a class="button button-primary" href="{% url 'prices:observation-create' %}">Add evidence</a>{% endif %}
+    <div><p class="eyebrow">{% if ui_language == 'tl' %}Rehistro ng ebidensya{% else %}Evidence register{% endif %}</p><h1>{% if ui_language == 'tl' %}Obserbasyon ng presyo{% else %}Price observations{% endif %}</h1><p>{% if ui_language == 'tl' %}Ang bawat pagwawasto ay bagong bersyon; nananatili sa kasaysayan ang orihinal na ebidensya.{% else %}Every correction is a new revision; original evidence stays in the audit history.{% endif %}</p></div>
+    {% if can_encode %}<a class="button button-primary" href="{% url 'prices:observation-create' %}">{% if ui_language == 'tl' %}Magdagdag ng ebidensya{% else %}Add evidence{% endif %}</a>{% endif %}
   </header>
 
-  <nav class="filter-row" aria-label="Filter observations">
-    <a {% if not selected_status %}aria-current="page"{% endif %} href="{% url 'prices:observation-list' %}">All</a>
+  <nav class="filter-row" aria-label="{% if ui_language == 'tl' %}Salaing obserbasyon{% else %}Filter observations{% endif %}">
+    <a {% if not selected_status %}aria-current="page"{% endif %} href="{% url 'prices:observation-list' %}">{% if ui_language == 'tl' %}Lahat{% else %}All{% endif %}</a>
     {% for value, label in statuses %}<a {% if selected_status == value %}aria-current="page"{% endif %} href="?status={{ value }}">{{ label }}</a>{% endfor %}
   </nav>
 
   <section class="panel">
-    <div class="table-wrap">
+    <div class="table-wrap" tabindex="0" role="region" aria-label="{% if ui_language == 'tl' %}Rehistro ng obserbasyon{% else %}Observation register{% endif %}">
       <table>
-        <thead><tr><th>Date</th><th>Scope</th><th>Series</th><th>Source</th><th>PHP/kg</th><th>Revision</th><th>Status</th></tr></thead>
+        <thead><tr><th scope="col">{% if ui_language == 'tl' %}Petsa{% else %}Date{% endif %}</th><th scope="col">{% if ui_language == 'tl' %}Saklaw{% else %}Scope{% endif %}</th><th scope="col">{% if ui_language == 'tl' %}Serye{% else %}Series{% endif %}</th><th scope="col">{% if ui_language == 'tl' %}Pinagmulan{% else %}Source{% endif %}</th><th scope="col">{{ ui.php_kg }}</th><th scope="col">{% if ui_language == 'tl' %}Bersyon{% else %}Revision{% endif %}</th><th scope="col">{% if ui_language == 'tl' %}Katayuan{% else %}Status{% endif %}</th></tr></thead>
         <tbody>
           {% for item in observations %}
             <tr>
-              <td><a href="{% url 'prices:observation-detail' item.public_id %}">{{ item.observed_on }}</a></td>
+              <td><a href="{% url 'prices:observation-detail' item.public_id %}">{{ item.observed_on|date:"M j, Y" }}</a></td>
               <td>{{ item.series.get_scope_display }}</td><td>{{ item.series.name }}</td><td>{{ item.source.name }}</td>
-              <td>{{ item.normalized_price|floatformat:2 }}</td><td>v{{ item.revision }}{% if not item.is_current %} · superseded{% endif %}</td>
+              <td>{{ item.normalized_price|floatformat:2 }}</td><td>v{{ item.revision }}{% if not item.is_current %} · {% if ui_language == 'tl' %}nalampasan{% else %}superseded{% endif %}{% endif %}</td>
               <td><span class="status-chip status-{{ item.workflow_status }}">{{ item.get_workflow_status_display }}</span></td>
             </tr>
-          {% empty %}<tr><td colspan="7">No matching observations.</td></tr>{% endfor %}
+          {% empty %}<tr><td colspan="7" class="empty-table">{% if ui_language == 'tl' %}Walang katugmang obserbasyon.{% else %}No matching observations.{% endif %}</td></tr>{% endfor %}
         </tbody>
       </table>
     </div>

@@ -15,13 +15,13 @@
 
 <section class="section-tight shell manage-grid">
   {% if can_manage_prices %}
-  <a class="manage-action primary-action" href="/manage/prices/">
+  <a class="manage-action primary-action" href="{% url 'prices:dashboard' %}">
     <span class="action-number">01</span><span class="action-icon" aria-hidden="true">＋</span>
     <div><h2>{% if ui_language == 'tl' %}Mga tala ng presyo{% else %}Price records{% endif %}</h2><p>{% if ui_language == 'tl' %}Mag-encode, mag-import, mag-review, at magberipika ng lokal na presyo.{% else %}Encode, import, review, and verify local price observations.{% endif %}</p></div><span class="action-arrow" aria-hidden="true">→</span>
   </a>
   {% endif %}
   {% if can_manage_research %}
-  <a class="manage-action" href="/manage/research/">
+  <a class="manage-action" href="{% url 'forecasting:dashboard' %}">
     <span class="action-number">02</span><span class="action-icon" aria-hidden="true">∿</span>
     <div><h2>{% if ui_language == 'tl' %}Laboratoryo ng taya{% else %}Forecast laboratory{% endif %}</h2><p>{% if ui_language == 'tl' %}Patakbuhin ang paghahambing, suriin ang metrics, at ilathala ang resulta.{% else %}Run comparisons, inspect metrics, and publish a result.{% endif %}</p></div><span class="action-arrow" aria-hidden="true">→</span>
   </a>

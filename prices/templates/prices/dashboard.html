@@ -1,64 +1,69 @@
 {% extends "base.html" %}
 
-{% block title %}Price evidence | GABAY{% endblock %}
+{% block title %}{% if ui_language == 'tl' %}Mga ebidensya ng presyo{% else %}Price evidence{% endif %} | GABAY{% endblock %}
 
 {% block content %}
 <main class="page-shell management-page">
+  <nav class="breadcrumbs" aria-label="Breadcrumb">
+    <a href="{% url 'portal:manage-dashboard' %}">{% if ui_language == 'tl' %}Pamamahala{% else %}Manage{% endif %}</a>
+    <span aria-hidden="true">›</span>
+    <span aria-current="page">{% if ui_language == 'tl' %}Mga ebidensya ng presyo{% else %}Price evidence{% endif %}</span>
+  </nav>
   <header class="page-header">
     <div>
-      <p class="eyebrow">Evidence workspace</p>
-      <h1>Price data review</h1>
-      <p>Local observations, official references, and demonstration records remain separate.</p>
+      <p class="eyebrow">{% if ui_language == 'tl' %}Lugar ng ebidensya{% else %}Evidence workspace{% endif %}</p>
+      <h1>{% if ui_language == 'tl' %}Pagsusuri ng datos ng presyo{% else %}Price data review{% endif %}</h1>
+      <p>{% if ui_language == 'tl' %}Nakahiwalay ang lokal na obserbasyon, opisyal na sanggunian, at demonstrasyong tala.{% else %}Local observations, official references, and demonstration records remain separate.{% endif %}</p>
     </div>
     <div class="button-row">
-      {% if can_encode %}<a class="button button-primary" href="{% url 'prices:observation-create' %}">Add evidence</a>{% endif %}
-      {% if can_encode %}<a class="button button-secondary" href="{% url 'prices:import-create' %}">Stage CSV</a>{% endif %}
-      {% if can_administer_research %}<a class="button button-secondary" href="{% url 'prices:series-selection' %}">Choose public series</a>{% endif %}
+      {% if can_encode %}<a class="button button-primary" href="{% url 'prices:observation-create' %}">{% if ui_language == 'tl' %}Magdagdag ng ebidensya{% else %}Add evidence{% endif %}</a>{% endif %}
+      {% if can_encode %}<a class="button button-secondary" href="{% url 'prices:import-create' %}">CSV</a>{% endif %}
+      {% if can_administer_research %}<a class="button button-secondary" href="{% url 'prices:series-selection' %}">{% if ui_language == 'tl' %}Piliin ang pampublikong serye{% else %}Choose public series{% endif %}</a>{% endif %}
     </div>
   </header>
 
-  <section class="metric-grid" aria-label="Evidence totals">
-    <article class="metric-card"><span>Awaiting verification</span><strong>{{ pending_count }}</strong></article>
-    <article class="metric-card"><span>Current verified records</span><strong>{{ verified_count }}</strong></article>
-    <article class="metric-card"><span>Imports needing review</span><strong>{{ review_batch_count }}</strong></article>
+  <section class="metric-grid" aria-label="{% if ui_language == 'tl' %}Kabuuang ebidensya{% else %}Evidence totals{% endif %}">
+    <article class="metric-card"><p class="metric-label">{% if ui_language == 'tl' %}Naghihintay ng beripikasyon{% else %}Awaiting verification{% endif %}</p><strong>{{ pending_count }}</strong></article>
+    <article class="metric-card"><p class="metric-label">{% if ui_language == 'tl' %}Kasalukuyang beripikadong tala{% else %}Current verified records{% endif %}</p><strong>{{ verified_count }}</strong></article>
+    <article class="metric-card"><p class="metric-label">{% if ui_language == 'tl' %}Import na kailangang suriin{% else %}Imports needing review{% endif %}</p><strong>{{ review_batch_count }}</strong></article>
   </section>
 
   <section class="panel">
-    <div class="panel-heading"><div><p class="eyebrow">Explicit selection</p><h2>Primary public series</h2></div></div>
+    <div class="panel-heading"><div><p class="eyebrow">{% if ui_language == 'tl' %}Malinaw na pagpili{% else %}Explicit selection{% endif %}</p><h2>{% if ui_language == 'tl' %}Pangunahing pampublikong serye{% else %}Primary public series{% endif %}</h2></div></div>
     <ul class="record-list">
-      {% for series in primary_series %}<li><strong>{{ series.get_scope_display }}</strong><span>{{ series.name }} · {{ series.get_classification_display }} · {{ series.get_condition_display }} · {{ series.location_name }}</span></li>{% empty %}<li>No primary public series selected. Public guidance will remain unavailable rather than choosing a classification automatically.</li>{% endfor %}
+      {% for series in primary_series %}<li><strong>{{ series.get_scope_display }}</strong><span>{{ series.name }} · {{ series.get_classification_display }} · {{ series.get_condition_display }} · {{ series.location_name }}</span></li>{% empty %}<li>{% if ui_language == 'tl' %}Walang napiling pangunahing serye. Mananatiling walang pampublikong gabay sa halip na awtomatikong pumili.{% else %}No primary public series selected. Public guidance will remain unavailable rather than choosing a classification automatically.{% endif %}</li>{% endfor %}
     </ul>
   </section>
 
   <section class="content-grid content-grid-wide">
     <article class="panel">
       <div class="panel-heading">
-        <div><p class="eyebrow">Recent activity</p><h2>Price observations</h2></div>
-        <a href="{% url 'prices:observation-list' %}">View all</a>
+        <div><p class="eyebrow">{% if ui_language == 'tl' %}Kamakailang gawain{% else %}Recent activity{% endif %}</p><h2>{% if ui_language == 'tl' %}Obserbasyon ng presyo{% else %}Price observations{% endif %}</h2></div>
+        <a href="{% url 'prices:observation-list' %}">{% if ui_language == 'tl' %}Tingnan lahat{% else %}View all{% endif %}</a>
       </div>
-      <div class="table-wrap">
+      <div class="table-wrap" tabindex="0" role="region" aria-label="{% if ui_language == 'tl' %}Obserbasyon ng presyo{% else %}Price observations{% endif %}">
         <table>
-          <thead><tr><th>Date</th><th>Series</th><th>PHP/kg</th><th>Status</th></tr></thead>
+          <thead><tr><th scope="col">{% if ui_language == 'tl' %}Petsa{% else %}Date{% endif %}</th><th scope="col">{% if ui_language == 'tl' %}Serye{% else %}Series{% endif %}</th><th scope="col">{{ ui.php_kg }}</th><th scope="col">{% if ui_language == 'tl' %}Katayuan{% else %}Status{% endif %}</th></tr></thead>
           <tbody>
             {% for item in recent_observations %}
               <tr>
-                <td><a href="{% url 'prices:observation-detail' item.public_id %}">{{ item.observed_on }}</a></td>
+                <td><a href="{% url 'prices:observation-detail' item.public_id %}">{{ item.observed_on|date:"M j, Y" }}</a></td>
                 <td>{{ item.series.name }}</td>
                 <td>{{ item.normalized_price|floatformat:2 }}</td>
                 <td><span class="status-chip status-{{ item.workflow_status }}">{{ item.get_workflow_status_display }}</span></td>
               </tr>
-            {% empty %}<tr><td colspan="4">No price evidence has been entered.</td></tr>{% endfor %}
+            {% empty %}<tr><td colspan="4">{% if ui_language == 'tl' %}Wala pang naitalang ebidensya ng presyo.{% else %}No price evidence has been entered.{% endif %}</td></tr>{% endfor %}
           </tbody>
         </table>
       </div>
     </article>
 
     <aside class="panel">
-      <div class="panel-heading"><div><p class="eyebrow">Intake</p><h2>Recent batches</h2></div><a href="{% url 'prices:import-list' %}">View all</a></div>
+      <div class="panel-heading"><div><p class="eyebrow">{% if ui_language == 'tl' %}Pagpasok{% else %}Intake{% endif %}</p><h2>{% if ui_language == 'tl' %}Kamakailang batch{% else %}Recent batches{% endif %}</h2></div><a href="{% url 'prices:import-list' %}">{% if ui_language == 'tl' %}Tingnan lahat{% else %}View all{% endif %}</a></div>
       <ul class="record-list">
         {% for batch in recent_batches %}
-          <li><a href="{% url 'prices:import-detail' batch.public_id %}"><strong>{{ batch.original_filename|default:batch.get_kind_display }}</strong><span>{{ batch.get_status_display }} · {{ batch.total_rows }} rows</span></a></li>
-        {% empty %}<li>No import batches yet.</li>{% endfor %}
+          <li><a href="{% url 'prices:import-detail' batch.public_id %}"><strong>{{ batch.original_filename|default:batch.get_kind_display }}</strong><span>{{ batch.get_status_display }} · {{ batch.total_rows }} {% if ui_language == 'tl' %}hanay{% else %}rows{% endif %}</span></a></li>
+        {% empty %}<li>{% if ui_language == 'tl' %}Wala pang import batch.{% else %}No import batches yet.{% endif %}</li>{% endfor %}
       </ul>
     </aside>
   </section>
