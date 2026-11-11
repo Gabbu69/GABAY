@@ -24,7 +24,7 @@ cd GABAY
 .\Start-GABAY-Lite.cmd
 ```
 
-The launcher downloads the SHA-256-verified Windows Lite release on its first run, checks for a
+The [Windows Lite v0.1.0 evaluation release](https://github.com/Gabbu69/GABAY/releases/tag/v0.1.0) provides the package used by this launcher. The launcher downloads the SHA-256-verified Windows Lite release on its first run, checks for a
 newer release on later starts, then opens GABAY locally. Project data stays outside the replaceable
 runtime. On a new database, the console asks you to create the first private administrator;
 no default password is shipped or saved to a file. It then offers an optional, explicitly labeled
@@ -92,3 +92,23 @@ See `docs/` for the data dictionary, research method, acceptance boundary, and d
 ## Evidence boundary
 
 The included demonstration dataset is synthetic and is visibly labeled throughout the product. It is not evidence of real M'lang prices or forecast accuracy. Real recommendations require sufficient verified, classification-compatible local observations. PSA Cotabato monthly prices are stored and displayed as a separate provincial reference series.
+
+## Release distribution
+
+`.github/workflows/release.yml` publishes the ZIP and checksum required by the
+launcher when a `v*` tag is pushed. It uses the existing verified Windows build
+and extracted-archive smoke test before publication. The first public package was
+promoted without rebuilding from the successful exact-source Windows CI artifact
+for commit `5bf81cf139c55e810570e549a0a92982703dd91f`. Its ZIP and checksum now
+satisfy the launcher's asset contract.
+
+The CI run passed 124 tests and the extracted package's migration, synthetic
+forecast, startup, and route checks. A later local launch was blocked before
+execution by Windows Application Control (Win32 4551). Do not disable security
+settings to run the demonstration: use the Python 3.12 source setup or an
+administrator-approved distribution process on managed systems. Fresh-account
+and physical 4 GB laptop acceptance remain pending. See the release notes for
+the precise source, checksum, and verification boundaries.
+
+The portfolio includes a fictional, read-only forecast journey. It does not
+replace a held-out evaluation on independently verified local observations.

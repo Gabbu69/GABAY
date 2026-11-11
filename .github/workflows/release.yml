@@ -1,0 +1,32 @@
+name: Publish Windows Lite release
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: write
+jobs:
+  windows-release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Verify and package the portable runtime
+        shell: pwsh
+        run: |
+          python -m venv .venv
+          .\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+          if ($LASTEXITCODE -ne 0) { throw 'Dependency installation failed.' }
+          .\scripts\build-portable.ps1
+          if ($LASTEXITCODE -ne 0) { throw 'Verified portable build failed.' }
+      - name: Publish the verified archive and checksum
+        uses: softprops/action-gh-release@v2
+        with:
+          fail_on_unmatched_files: true
+          overwrite_files: false
+          generate_release_notes: true
+          files: |
+            dist/GABAY-Windows-x64-Lite.zip
+            dist/GABAY-Windows-x64-Lite.zip.sha256
